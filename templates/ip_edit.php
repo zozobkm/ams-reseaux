@@ -37,7 +37,6 @@ if(isset($_POST['new_last'])){
     $new_last = trim($_POST['new_last']);
     $new_ip = $prefix.$new_last;
 
-    echo "<pre>⏳ Modification en cours...</pre>";
 
     // Modifier la ligne dans le fichier interfaces
     $cmd = "sudo sed -i 's/address .*/address $new_ip/' $file";
@@ -48,7 +47,7 @@ if(isset($_POST['new_last'])){
 
     // Lire la nouvelle IP réelle
     $new_real_ip = trim(shell_exec("ip -4 addr show eth1 | grep 'inet ' | awk '{print \$2}'"));
-    echo "<pre>✅ Nouvelle adresse IP appliquée : $new_ip ($new_real_ip)</pre>";
+    echo "<pre> Nouvelle adresse IP  : $new_ip ($new_real_ip)</pre>";
 }
 ?>
 
