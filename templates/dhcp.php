@@ -16,17 +16,47 @@ input[type=submit]:hover{background:#005fa3}
 <body>
 
 <h2>Configuration DHCP automatique</h2>
+
+<?php
+// Récupère l'adresse IP de l'interface interne (eth1 ou enp0s8)
+$ip = trim(shell_exec("ip -4 addr show eth1 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'"));
+if(empty($ip)){
+    $ip = trim(shell_exec("ip -4 addr show enp0s8 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'"));
+}
+
+// Calcule le réseau (dernier octet à 0)
+$parts = explode('.', $ip);
+$reseau = "$parts[0].$parts[1].$parts[2].0";
+
+// Calcule plage auto
+$debut = "$parts[0].$parts[1].$parts[2].10";
+$fin   = "$parts[0].$parts[1].$parts[2].50";
+$passerelle = $ip;
+?>
+
 <form method="post">
-<label>Nombre d'appareils :</label>
-<input type="text" name="nb_appareils" placeholder="Ex : 5">
-<input type="submit" name="auto" value="Appliquer">
+<label>Adresse réseau :</label>
+<input type="text" name="reseau" value="<?php echo $reseau; ?>" readonly>
+<label>Masque :</label>
+<input type="text" name="masque" value="255.255.255.0" readonly>
+<label>Début plage :</label>
+<input type="text" name="debut" value="<?php echo $debut; ?>">
+<label>Fin plage :</label>
+<input type="text" name="fin" value="<?php echo $fin; ?>">
+<label>Passerelle :</label>
+<input type="text" name="passerelle" value="<?php echo $passerelle; ?>" readonly>
+<input type="submit" name="appliquer" value="Appliquer">
 </form>
 
 <?php
-if(isset($_POST['auto'])){
- $n=$_POST['nb_appareils'];
+if(isset($_POST['appliquer'])){
+ $r=$_POST['reseau'];
+ $m=$_POST['masque'];
+ $d=$_POST['debut'];
+ $f=$_POST['fin'];
+ $p=$_POST['passerelle'];
  echo "<pre>";
- echo shell_exec("sudo bash ../scripts/config_dhcp_auto.sh $n 2>&1");
+ echo shell_exec("sudo bash ../scripts/config_dhcp_auto.sh $r $m $d $f $p 2>&1");
  echo "</pre>";
 }
 ?>
