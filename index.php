@@ -8,9 +8,9 @@
 <body>
 <h1>Bienvenue sur votre Box Réseaux</h1>
 <nav>
- <a href="templates/dns.php">DNS</a> |
- <a href="templates/dhcp.php">DHCP</a> |
- <a href="templates/ftp.php">FTP</a> |
+ <a href="templates/dns.php">DNS</a>
+ <a href="templates/dhcp.php">DHCP</a> 
+ <a href="templates/ftp.php">FTP</a> 
  <a href="templates/mail.php">Mail</a>
 </nav>
 <p>Choisissez un service à configurer.</p>
