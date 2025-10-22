@@ -64,36 +64,36 @@ if(isset($_POST['auto'])){
 
 <h2>Configuration manuelle (mode avancé)</h2>
 <form method="post">
-<label>Adresse réseau :</label>
-<input type="text" name="reseau" value="192.168.1.0">
-<label>Masque :</label>
-<input type="text" name="masque" value="255.255.255.0">
-<label>Début plage :</label>
-<input type="text" name="debut" value="192.168.1.10">
-<label>Fin plage :</label>
-<input type="text" name="fin" value="192.168.1.20">
-<label>Passerelle :</label>
-<input type="text" name="passerelle" value="192.168.1.1">
+<label>Début de plage :</label>
+<input type="text" name="debut" value="192.168.10.10">
+<label>Fin de plage :</label>
+<input type="text" name="fin" value="192.168.10.50">
 <input type="submit" name="manuel" value="Appliquer">
 </form>
 
 <?php
 if(isset($_POST['manuel'])){
- $r=$_POST['reseau'];
- $m=$_POST['masque'];
  $d=$_POST['debut'];
  $f=$_POST['fin'];
- $p=$_POST['passerelle'];
 
- echo "<h3>Mode manuel appliqué</h3>";
+ // Détection interface et IP passerelle
+ $interface = trim(shell_exec("ip -o link show | awk -F': ' '{print \$2}' | grep -E '^eth1|enp0s8' | head -n1"));
+ $ip = trim(shell_exec("ip -4 addr show $interface | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'"));
+ $mask="255.255.255.0";
+ $parts = explode('.', $ip);
+ $reseau = "$parts[0].$parts[1].$parts[2].0";
+ $passerelle = "$parts[0].$parts[1].$parts[2].1";
+
+ echo "<h3>Mode avancé appliqué</h3>";
  echo "<pre>";
- echo ">> Réseau : $r\n";
- echo ">> Masque : $m\n";
- echo ">> Plage DHCP : $d - $f\n";
- echo ">> Passerelle : $p\n";
- echo shell_exec("sudo bash ../scripts/config_dhcp_auto.sh $r $m $d $f $p 2>&1");
+ echo "Interface : $interface\n";
+ echo "Adresse IP du serveur : $ip\n";
+ echo "Réseau détecté : $reseau\n";
+ echo "Plage demandée : $d → $f\n";
+ echo shell_exec("sudo bash ../scripts/config_dhcp_manuel.sh $reseau $mask $d $f $passerelle 2>&1");
  echo "</pre>";
 }
 ?>
+
 </body>
 </html>
