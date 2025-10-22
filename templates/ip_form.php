@@ -25,23 +25,39 @@ pre{background:#eee;padding:10px;text-align:left;overflow:auto;border-radius:5px
 
 <?php
 if(isset($_POST['auto'])){
- $n=$_POST['nb_appareils'];
- echo "<h3>Mode automatique : $n appareils</h3>";
+ $n=intval($_POST['nb_appareils']);
+ if($n<1)$n=1;
 
- // Détecter interface
+ // Détecte l’interface réseau
  $interface = trim(shell_exec("ip -o link show | awk -F': ' '{print \$2}' | grep -E '^eth1|enp0s8' | head -n1"));
+ if(empty($interface)) $interface="eth1";
+
+ // Récupère l’adresse IP actuelle du serveur
  $current_ip = trim(shell_exec("ip -4 addr show $interface | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'"));
- if(empty($current_ip)) $current_ip = "192.168.1.1";
+ if(empty($current_ip)) $current_ip="192.168.1.1";
 
- // Calcul automatique
+ // Découpe l’adresse et prépare la nouvelle
  $parts = explode('.', $current_ip);
- $new_ip = "$parts[0].$parts[1].$parts[2].16";
+ $reseau = "$parts[0].$parts[1].$parts[2].0";
  $mask = "255.255.255.0";
+ $passerelle = $current_ip;
 
+ // Plage automatique en fonction du nombre d’appareils
+ $start = 10;
+ $end = $start + $n;
+ $debut = "$parts[0].$parts[1].$parts[2].$start";
+ $fin = "$parts[0].$parts[1].$parts[2].$end";
+
+ // Application de la nouvelle IP (exemple)
+ $new_ip = "$parts[0].$parts[1].$parts[2].16";
+ shell_exec("sudo ifconfig $interface $new_ip netmask $mask up");
+
+ echo "<h3>Mode automatique : $n appareils</h3>";
  echo "<pre>";
- echo ">> Attribution auto de l'addr $new_ip/24 à $interface\n";
- echo shell_exec("sudo ifconfig $interface $new_ip netmask $mask");
- echo ">> Nouvelle IP appliquée : $new_ip/24 avec gateway $current_ip\n";
+ echo ">> Interface détectée : $interface\n";
+ echo ">> IP actuelle : $current_ip\n";
+ echo ">> Nouvelle IP appliquée : $new_ip/24 avec gateway $passerelle\n";
+ echo ">> Plage DHCP attribuée : $debut - $fin\n";
  echo "</pre>";
 }
 ?>
@@ -69,10 +85,12 @@ if(isset($_POST['manuel'])){
  $f=$_POST['fin'];
  $p=$_POST['passerelle'];
 
+ echo "<h3>Mode manuel appliqué</h3>";
  echo "<pre>";
- echo "Configuration manuelle du réseau : $r\n";
- echo "Plage d'adresses : $d - $f\n";
- echo "Passerelle : $p\n";
+ echo ">> Réseau : $r\n";
+ echo ">> Masque : $m\n";
+ echo ">> Plage DHCP : $d - $f\n";
+ echo ">> Passerelle : $p\n";
  echo shell_exec("sudo bash ../scripts/config_dhcp_auto.sh $r $m $d $f $p 2>&1");
  echo "</pre>";
 }
