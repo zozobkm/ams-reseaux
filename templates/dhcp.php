@@ -17,14 +17,14 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_POST["nb_appareils"])){
         // Vérifie le statut du service DHCP
         $status = shell_exec("systemctl is-active isc-dhcp-server");
 
-        echo "<h2 style='color:green'>DHCP automatique configuré pour $nb appareils</h2>";
+        echo "<h2>DHCP automatique configuré pour $nb appareils</h2>";
         echo "<p><b>Réseau :</b> $reseau / <b>Masque :</b> $masque</p>";
         echo "<p><b>Plage attribuée :</b> $debut → $fin</p>";
         echo "<p><b>Passerelle :</b> $passerelle</p>";
-        echo "<p><b>Statut du service :</b> <span style='color:".($status=='active'?'green':'red')."'>$status</span></p>";
+        echo "<p><b>Statut du service :</b> $status</span></p>";
         echo "<pre>$output</pre>";
     } else {
-        echo "<p style='color:red'> Nombre d'appareils invalide.</p>";
+        echo "<p> Nombre d'appareils invalide.</p>";
     }
 }
 ?>
