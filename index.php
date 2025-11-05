@@ -11,7 +11,7 @@
  <a href="templates/ip_edit.php">Modif interfaces</a>
  <a href="templates/dns.php">DNS</a>
  <a href="templates/ip_form.php">DHCP eth1</a> 
- <a href="templates/dns.php">DHCP eth1</a> 
+ <a href="templates/dhcp.php">DHCP </a> 
  
 
  
