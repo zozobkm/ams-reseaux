@@ -15,6 +15,8 @@ input[type=submit]:hover{background:#005fa3}
 pre{background:#eee;padding:10px;text-align:left;border-radius:5px}
 </style>
 </head>
+ <?php include('menu.php'); ?>
+
 <body>
 
 <h2>Modification de l'adresse IP (interface eth1)</h2>
