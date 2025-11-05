@@ -1,6 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><title>Configuration DNS</title></head>
+ <?php include('menu.php'); ?>
+
 <body>
 <h2>Configurer un domaine DNS</h2>
 <form method="post">
