@@ -1,3 +1,6 @@
+
+<?php include('menu.php'); ?>
+
 <?php
 if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_POST["nb_appareils"])){
     $nb = intval($_POST["nb_appareils"]);
