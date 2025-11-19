@@ -34,28 +34,33 @@ if (isset($_POST['auto'])) {
 // MODE AVANCÉ
 if (isset($_POST['manuel'])) {
 
-    $d = $_POST['debut'];
-    $f = $_POST['fin'];
+    $d = trim($_POST['debut']);
+    $f = trim($_POST['fin']);
 
-    // extraction réseau automatiquement
-    $parts = explode('.', $d);
-    $reseau = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".0";
-    $passerelle = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".1";
-    $masque = "255.255.255.0";
+    // Vérification basique
+    if ($d === "" || $f === "") {
+        $resultat = "<b style='color:red;'>Erreur : les champs ne peuvent pas être vides.</b>";
+    } else {
 
-    // exécution du script DHCP
-    $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh 
-            $reseau $masque $d $f $passerelle";
+        $parts = explode(".", $d);
+        $reseau = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".0";
 
-    $resultat = shell_exec($cmd . " 2>&1");
+        // masque fixe
+        $masque = "255.255.255.0";
+        $passerelle = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".1";
+        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh
+                $reseau $masque $d $f $passerelle";
 
-    $resultat = "
+        $log = shell_exec("$cmd 2>&1");
+        $resultat = "
         <b>Mode avancé appliqué :</b><br>
         Réseau : $reseau<br>
         Plage : $d → $f <br>
         Passerelle : $passerelle<br>
-        <pre>$resultat</pre>";
+        <pre>$log</pre>";
+    }
 }
+
 
 ?>
 
@@ -67,17 +72,14 @@ if (isset($_POST['manuel'])) {
 </form>
 
 <hr>
-
 <h2>Configuration manuelle (mode avancé)</h2>
 <form method="post">
-   
-    Début plage :
+    <label>Début plage :</label>
     <input type="text" name="debut" placeholder="192.168.10.10" required><br>
 
-    Fin plage :
-    <input type="text" name="fin" placeholder="192.168.10.50" required><br>
+    <label>Fin plage :</label>
+    <input type="text" name="fin" placeholder="192.168.10.50" required><br><br>
 
-  
     <button type="submit" name="manuel">Appliquer</button>
 </form>
 
