@@ -2,39 +2,84 @@
 <?php include('menu.php'); ?>
 
 <?php
-if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_POST["nb_appareils"])){
-    $nb = intval($_POST["nb_appareils"]);
-    if($nb>0){
-        // Variables réseau
-        $reseau = "192.168.10.0";
-        $masque = "255.255.255.0";
-        $passerelle = "192.168.10.1";
-        $debut = "192.168.10.10";
-        $fin_val = 10 + $nb;
-        $fin = "192.168.10.$fin_val";
+// récupération IP eth1
+$ip = trim(shell_exec("ip -4 addr show eth1 | grep inet | awk '{print $2}' | cut -d'/' -f1"));
+$parts = explode(".", $ip);
 
-        // Exécution du script automatique
-        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh $reseau $masque $debut $fin $passerelle 2>&1";
-        $output = shell_exec($cmd);
+// reconstruction du réseau automatiquement
+$reseau = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".0";
+$passerelle = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".1";
 
-        // Vérifie le statut du service DHCP
-        $status = shell_exec("systemctl is-active isc-dhcp-server");
+// Messages
+$resultat = "";
+$avancer = false;
 
-        echo "<h2>DHCP automatique configuré pour $nb appareils</h2>";
-        echo "<p><b>Réseau :</b> $reseau / <b>Masque :</b> $masque</p>";
-        echo "<p><b>Plage attribuée :</b> $debut → $fin</p>";
-        echo "<p><b>Passerelle :</b> $passerelle</p>";
-        echo "<p><b>Statut du service :</b> $status</span></p>";
-        echo "<pre>$output</pre>";
-    } else {
-        echo "<p> Nombre d'appareils invalide.</p>";
+// MODE AUTOMATIQUE
+if (isset($_POST['auto'])) {
+    $nb = intval($_POST['nb']);
+    if ($nb > 0) {
+        $debut = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".10";
+        $fin_num = 10 + $nb;
+        $fin = $parts[0] . "." . $parts[1] . "." . $parts[2] . "." . $fin_num;
+
+        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh 
+                $reseau 255.255.255.0 $debut $fin $passerelle";
+        $resultat = shell_exec($cmd . " 2>&1");
+
+        $resultat = "<b>Mode automatique appliqué :</b><br>
+                     Plage générée : $debut → $fin <br><pre>$resultat</pre>";
     }
+}
+
+// MODE AVANCÉ
+if (isset($_POST['manuel'])) {
+    $r = $_POST['reseau'];
+    $m = $_POST['masque'];
+    $d = $_POST['debut'];
+    $f = $_POST['fin'];
+    $p = $_POST['passerelle'];
+
+    $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh 
+            $r $m $d $f $p";
+    $resultat = shell_exec($cmd . " 2>&1");
+
+    $resultat = "<b>Mode avancé appliqué :</b><br>
+                 Réseau : $r<br>
+                 Plage : $d → $f <br>
+                 Passerelle : $p <br><pre>$resultat</pre>";
 }
 ?>
 
 <h2>Configuration DHCP automatique</h2>
 <form method="post">
-    <label>Nombre d'appareils :</label>
-    <input type="number" name="nb_appareils" min="1" max="50" required>
-    <input type="submit" value="Appliquer">
+    Nombre d'appareils :
+    <input type="number" name="nb" min="1" required>
+    <button type="submit" name="auto">Appliquer</button>
 </form>
+
+<hr>
+
+<h2>Configuration manuelle (mode avancé)</h2>
+<form method="post">
+    Adresse réseau :
+    <input type="text" name="reseau" value="<?php echo $reseau; ?>" required><br>
+
+    Masque :
+    <input type="text" name="masque" value="255.255.255.0" required><br>
+
+    Début plage :
+    <input type="text" name="debut" placeholder="192.168.10.10" required><br>
+
+    Fin plage :
+    <input type="text" name="fin" placeholder="192.168.10.50" required><br>
+
+    Passerelle :
+    <input type="text" name="passerelle" value="<?php echo $passerelle; ?>" required><br><br>
+
+    <button type="submit" name="manuel">Appliquer</button>
+</form>
+
+<?php
+if ($resultat != "") echo "<hr><div>$resultat</div>";
+?>
+
