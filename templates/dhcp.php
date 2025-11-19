@@ -33,11 +33,9 @@ if (isset($_POST['auto'])) {
 
 // MODE AVANCÉ
 if (isset($_POST['manuel'])) {
-    $r = $_POST['reseau'];
-    $m = $_POST['masque'];
     $d = $_POST['debut'];
     $f = $_POST['fin'];
-    $p = $_POST['passerelle'];
+ 
 
     $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh 
             $r $m $d $f $p";
@@ -61,21 +59,14 @@ if (isset($_POST['manuel'])) {
 
 <h2>Configuration manuelle (mode avancé)</h2>
 <form method="post">
-    Adresse réseau :
-    <input type="text" name="reseau" value="<?php echo $reseau; ?>" required><br>
-
-    Masque :
-    <input type="text" name="masque" value="255.255.255.0" required><br>
-
+   
     Début plage :
     <input type="text" name="debut" placeholder="192.168.10.10" required><br>
 
     Fin plage :
     <input type="text" name="fin" placeholder="192.168.10.50" required><br>
 
-    Passerelle :
-    <input type="text" name="passerelle" value="<?php echo $passerelle; ?>" required><br><br>
-
+  
     <button type="submit" name="manuel">Appliquer</button>
 </form>
 
