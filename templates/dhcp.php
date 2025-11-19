@@ -33,19 +33,30 @@ if (isset($_POST['auto'])) {
 
 // MODE AVANCÉ
 if (isset($_POST['manuel'])) {
+
     $d = $_POST['debut'];
     $f = $_POST['fin'];
- 
 
+    // extraction réseau automatiquement
+    $parts = explode('.', $d);
+    $reseau = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".0";
+    $passerelle = $parts[0] . "." . $parts[1] . "." . $parts[2] . ".1";
+    $masque = "255.255.255.0";
+
+    // exécution du script DHCP
     $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh 
-            $r $m $d $f $p";
+            $reseau $masque $d $f $passerelle";
+
     $resultat = shell_exec($cmd . " 2>&1");
 
-    $resultat = "<b>Mode avancé appliqué :</b><br>
-                 Réseau : $r<br>
-                 Plage : $d → $f <br>
-                 Passerelle : $p <br><pre>$resultat</pre>";
+    $resultat = "
+        <b>Mode avancé appliqué :</b><br>
+        Réseau : $reseau<br>
+        Plage : $d → $f <br>
+        Passerelle : $passerelle<br>
+        <pre>$resultat</pre>";
 }
+
 ?>
 
 <h2>Configuration DHCP automatique</h2>
