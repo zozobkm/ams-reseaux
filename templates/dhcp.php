@@ -39,6 +39,7 @@ if (isset($_POST['auto'])) {
 }
 
 // ================= MODE MANUEL ===================
+i// ================= MODE MANUEL ===================
 if (isset($_POST['manuel'])) {
 
     $d = trim($_POST['debut']);
@@ -50,18 +51,18 @@ if (isset($_POST['manuel'])) {
 
         $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh ".
                "$reseau $masque $d $f $passerelle";
+        $log = shell_exec("$cmd 2>&1");
 
-        
         $resultat = "
         <b>Mode avancé appliqué :</b><br>
         Réseau : $reseau<br>
         Plage : $d → $f<br>
         Passerelle : $passerelle<br>
-        
+        <pre>$log</pre>
         ";
     }
 }
-?>
+
 
 <h2>Configuration DHCP automatique</h2>
 
