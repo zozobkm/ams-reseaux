@@ -1,34 +1,34 @@
-#!/bin/bash
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration DNS</title>
+</head>
 
-DOMAINE=$1
-ZONEFILE="/etc/bind/db.$DOMAINE"
-CONF="/etc/bind/named.conf.local"
+<?php include('menu.php'); ?>
 
-echo "Création du domaine $DOMAINE..."
+<body>
+<h2>Configurer un domaine DNS</h2>
 
-# Vérifier si la zone existe déjà dans named.conf.local
-if grep -q "zone \"$DOMAINE\"" $CONF; then
-    echo "La zone $DOMAINE existe déjà dans $CONF. Aucun ajout effectué."
-else
-    echo "➕ Ajout de la zone $DOMAINE dans named.conf.local..."
-    sudo bash -c "echo 'zone \"$DOMAINE\" { type master; file \"$ZONEFILE\"; };' >> $CONF"
-fi
+<form method="post">
+    <label>Domaine :</label>
+    <input type="text" name="domaine" placeholder="ex : zozo" required>
+    <input type="submit" name="configurer" value="Configurer">
+</form>
 
-# Vérifier si le fichier de zone existe déjà
-if [ -f "$ZONEFILE" ]; then
-    echo "Le fichier $ZONEFILE existe déjà, pas de copie."
-else
-    echo "📄 Création du fichier $ZONEFILE..."
-    sudo cp /etc/bind/db.local "$ZONEFILE"
-    sudo sed -i "s/local/$DOMAINE/g" "$ZONEFILE"
-fi
+<?php
+if(isset($_POST['configurer'])){
+    $domaine = trim($_POST['domaine']);
 
-echo "🔄 Redémarrage de bind9..."
-sudo systemctl restart bind9
+    if($domaine !== ""){
+        echo "<h3>Résultat :</h3><pre>";
+        echo shell_exec("sudo bash /var/www/html/ams-reseaux/scripts/config_dns.sh $domaine 2>&1");
+        echo "</pre>";
+    } else {
+        echo "<p style='color:red;'>Erreur : domaine vide.</p>";
+    }
+}
+?>
 
-# Vérification du statut
-if systemctl is-active --quiet bind9; then
-    echo "DNS configuré pour $DOMAINE (bind9 actif)"
-else
-    echo " ERREUR : bind9 ne démarre pas. Vérifiez le fichier de zone."
-fi
+</body>
+</html>
