@@ -35,6 +35,11 @@ a.btn:hover{background:#005fa3}
     <p>Configurer le serveur DNS local (association noms ↔ IP).</p>
     <a href="dns.php" class="btn">Configurer le DNS</a>
 </div>
+    <div class="card">
+    <h2>NAT </h2>
+    <p>Configurer le NAt.</p>
+    <a href="nat.php" class="btn">Configurer le NAt</a>
+</div>
 
 </body>
 </html>
