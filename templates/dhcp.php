@@ -25,8 +25,8 @@ if (isset($_POST['auto'])) {
         $fin_num = 10 + $nb;
         $fin = "{$parts[0]}.{$parts[1]}.{$parts[2]}.$fin_num";
 
-        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh ".
-               "$reseau $masque $debut $fin $passerelle";
+        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh "
+             . "$reseau $masque $debut $fin $passerelle";
 
         $log = shell_exec("$cmd 2>&1");
 
@@ -39,7 +39,6 @@ if (isset($_POST['auto'])) {
 }
 
 // ================= MODE MANUEL ===================
-i// ================= MODE MANUEL ===================
 if (isset($_POST['manuel'])) {
 
     $d = trim($_POST['debut']);
@@ -49,8 +48,9 @@ if (isset($_POST['manuel'])) {
         $resultat = "<span style='color:red;'>Erreur : champs vides</span>";
     } else {
 
-        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh ".
-               "$reseau $masque $d $f $passerelle";
+        $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh "
+             . "$reseau $masque $d $f $passerelle";
+
         $log = shell_exec("$cmd 2>&1");
 
         $resultat = "
@@ -62,7 +62,7 @@ if (isset($_POST['manuel'])) {
         ";
     }
 }
-
+?>
 
 <h2>Configuration DHCP automatique</h2>
 
@@ -86,4 +86,8 @@ if (isset($_POST['manuel'])) {
     <button type="submit" name="manuel">Appliquer</button>
 </form>
 
-<?php if ($resultat) echo "<hr>$resultat"; ?>
+<?php 
+if ($resultat) {
+    echo "<hr>$resultat";
+}
+?>
