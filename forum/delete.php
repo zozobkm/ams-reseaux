@@ -1,10 +1,12 @@
 <?php
 require_once 'db.php';
 
-$id = intval($_POST['id']);
+if (!isset($_POST['id'])) {
+    die("ID manquant");
+}
 
 $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
-$stmt->execute([$id]);
+$stmt->execute([$_POST['id']]);
 
 header("Location: index.php");
 exit;
