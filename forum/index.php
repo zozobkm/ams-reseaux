@@ -49,9 +49,6 @@ $messages = $stmt->fetchAll();
     <textarea name="contenu" placeholder="Votre message" required></textarea>
     <br><br>
     <button type="submit">Envoyer</button>
-    <form method="post" action="delete.php" style="display:inline;">
-    <input type="hidden" name="id" value="<?= $msg['id'] ?>">
-    <button type="submit">Supprimer</button>
 </form>
 
 </form>
