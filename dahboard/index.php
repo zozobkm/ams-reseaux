@@ -1,41 +1,45 @@
 <?php
-require_once __DIR__."/../auth/require_login.php";
+session_start();
+if (!isset($_SESSION["user_id"])) {
+    header("Location: /ams-reseaux/auth/login.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>Dashboard Box</title>
 <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
-<?php include __DIR__."/../menu.php"; ?>
 
-<div class="container">
-    <h1>Dashboard Box</h1>
+<?php include __DIR__ . '/../menu.php'; ?>
 
-    <div class="card">
-        <p><strong>Connecté :</strong> <?= htmlspecialchars($_SESSION["email"]) ?></p>
-        <p><strong>Rôle :</strong> <?= htmlspecialchars($_SESSION["role"]) ?></p>
-        <p><strong>Mode :</strong> <?= htmlspecialchars($_SESSION["mode"]) ?></p>
+<h1>Tableau de bord</h1>
 
-        <div class="row">
-            <a class="btn" href="/ams-reseaux/dashboard/set_mode.php?mode=normal">Mode Normal</a>
-            <a class="btn" href="/ams-reseaux/dashboard/set_mode.php?mode=avance">Mode Avancé</a>
-        </div>
-    </div>
+<p>Connecté en tant que : <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong></p>
+<p>Rôle : <strong><?= htmlspecialchars($_SESSION["role"]) ?></strong></p>
+<p>Mode actuel : <strong><?= htmlspecialchars($_SESSION["mode"]) ?></strong></p>
 
-    <div class="grid">
-        <a class="tile" href="/ams-reseaux/services/dhcp.php">DHCP</a>
-        <a class="tile" href="/ams-reseaux/services/dns.php">DNS</a>
-        <a class="tile" href="/ams-reseaux/services/nat.php">NAT</a>
-        <a class="tile" href="/ams-reseaux/services/ftp.php">FTP Débit</a>
-        <a class="tile" href="/ams-reseaux/services/mail.php">Mail</a>
-        <a class="tile" href="/ams-reseaux/services/forum.php">Forum</a>
-        <?php if($_SESSION["role"]==="admin"): ?>
-            <a class="tile admin" href="/ams-reseaux/admin/users.php">Admin Utilisateurs</a>
-        <?php endif; ?>
-    </div>
+<hr>
+
+<form method="post" action="toggle_mode.php">
+    <button type="submit">
+        Passer en mode <?= $_SESSION["mode"] === "normal" ? "avancé" : "normal" ?>
+    </button>
+</form>
+
+<hr>
+
+<div class="grid">
+    <a class="card" href="/ams-reseaux/services/forum.php">Forum</a>
+    <a class="card" href="/ams-reseaux/services/dhcp.php">DHCP</a>
+    <a class="card" href="/ams-reseaux/services/dns.php">DNS</a>
+    <a class="card" href="/ams-reseaux/services/nat.php">NAT</a>
+    <a class="card" href="/ams-reseaux/services/ftp.php">Débit FTP</a>
+    <a class="card" href="/ams-reseaux/services/mail.php">Mail</a>
 </div>
+
 </body>
 </html>
