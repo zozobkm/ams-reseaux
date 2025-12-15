@@ -3,14 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Configuration réseau AMS</title>
-<style>
-body{font-family:Arial;background:#f4f4f4;padding:20px;text-align:center}
-h1{color:#333;margin-bottom:30px}
-.card{background:white;display:inline-block;width:350px;padding:20px;margin:15px;border-radius:10px;box-shadow:0 0 5px #ccc;text-align:left}
-.card h2{color:#0078d7;margin-bottom:10px}
-a.btn{display:inline-block;background:#0078d7;color:white;text-decoration:none;padding:10px 20px;border-radius:5px;margin-top:10px}
-a.btn:hover{background:#005fa3}
-</style>
+<link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+
 </head>
 <body>
 
