@@ -1,5 +1,4 @@
 <?php
- include('menu.php'); 
 require_once 'db.php';
 $sql = "
     SELECT messages.contenu, messages.date_post, users.username
@@ -21,7 +20,7 @@ $messages = $stmt->fetchAll();
     <title>Forum</title>
 </head>
 <body>
-
+<?php include __DIR__ . '/menu.php'; ?>
 <h1>Forum</h1>
 
 <?php if(empty($messages)): ?>
