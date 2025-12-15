@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <title>Configuration DHCP</title>
+</head>
 
 
 <?php
@@ -91,3 +98,4 @@ if ($resultat) {
     echo "<hr>$resultat";
 }
 ?>
+</html>
