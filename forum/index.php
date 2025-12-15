@@ -16,7 +16,6 @@ $messages = $stmt->fetchAll();
 <html lang="fr">
 <head>
     <link rel="stylesheet" href="style.css">
-
     <meta charset="UTF-8">
     <title>Forum</title>
 </head>
