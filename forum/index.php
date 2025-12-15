@@ -1,3 +1,12 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <title>Configuration DHCP</title>
+</head>
+<?php include('menu.php'); ?>
+
 <?php
 require_once 'db.php';
 $sql = "
@@ -7,19 +16,10 @@ $sql = "
     ORDER BY messages.date_post DESC
 ";
 
-
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
-    <title>Configuration DHCP</title>
-</head>
-<?php include('menu.php'); ?>
 
 <h1>Forum</h1>
 
