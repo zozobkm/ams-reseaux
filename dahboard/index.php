@@ -5,6 +5,11 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+echo "<h1>DASHBOARD OK</h1>";
+
+echo "<pre>";
+var_dump($_SESSION);
+echo "</pre>";
 if (!isset($_SESSION["user_id"])) {
     header("Location: /ams-reseaux/auth/login.php");
     exit;
