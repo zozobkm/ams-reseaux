@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+/* ===== CONNEXION DB ===== */
 require_once __DIR__ . '/../forum/db.php';
 
 /* ===== MODE ADMIN ===== */
@@ -16,7 +18,6 @@ $sql = "
     JOIN users ON messages.user_id = users.id
     ORDER BY messages.date_post DESC
 ";
-
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
@@ -29,24 +30,22 @@ $messages = $stmt->fetchAll();
 </head>
 <body>
 
-<?php include __DIR__ . '/menu.php'; ?>
+<?php include __DIR__ . '/../menu.php'; ?>
 
 <h1>Forum</h1>
 
-<!-- ===== FORMULAIRE MODE ADMIN ===== -->
+<!-- ===== MODE ADMIN ===== -->
 <?php if (!isset($_SESSION['admin'])): ?>
-    <form method="post">
+    <form method="post" style="margin-bottom:20px;">
         <input type="password" name="admin_key" placeholder="Clé admin">
         <button type="submit">Activer mode admin</button>
     </form>
 <?php else: ?>
     <p><strong>Mode administrateur activé</strong></p>
-
-    <form method="post" action="logout_admin.php">
+    <form method="post" action="/ams-reseaux/forum/logout_admin.php">
         <button type="submit">Quitter le mode admin</button>
     </form>
 <?php endif; ?>
-
 
 <hr>
 
@@ -62,7 +61,7 @@ $messages = $stmt->fetchAll();
             <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
 
             <?php if (isset($_SESSION['admin'])): ?>
-                <form method="post" action="delete.php">
+                <form method="post" action="/ams-reseaux/forum/delete.php">
                     <input type="hidden" name="id" value="<?= $msg['id'] ?>">
                     <button type="submit">Supprimer</button>
                 </form>
@@ -76,7 +75,7 @@ $messages = $stmt->fetchAll();
 <!-- ===== AJOUT DE MESSAGE ===== -->
 <h2>Poster un message</h2>
 
-<form method="post" action="post.php">
+<form method="post" action="/ams-reseaux/forum/post.php">
     <input type="text" name="username" placeholder="Pseudo" required><br><br>
     <textarea name="contenu" placeholder="Votre message" required></textarea><br><br>
     <button type="submit">Envoyer</button>
