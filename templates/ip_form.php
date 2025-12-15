@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Configuration réseau AMS</title>
 <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+<?php include('menu.php'); ?>
 
 </head>
 <body>
