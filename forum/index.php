@@ -15,13 +15,12 @@ $messages = $stmt->fetchAll();
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
-
     <meta charset="UTF-8">
-    <title>Forum</title>
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <title>Configuration DHCP</title>
 </head>
-<body>
-<?php include __DIR__ . '/menu.php'; ?>
+<?php include('menu.php'); ?>
+
 <h1>Forum</h1>
 
 <?php if(empty($messages)): ?>
