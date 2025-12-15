@@ -41,7 +41,12 @@ $messages = $stmt->fetchAll();
     </form>
 <?php else: ?>
     <p><strong>Mode administrateur activé</strong></p>
+
+    <form method="post" action="logout_admin.php">
+        <button type="submit">Quitter le mode admin</button>
+    </form>
 <?php endif; ?>
+
 
 <hr>
 
