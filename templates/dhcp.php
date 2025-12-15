@@ -1,4 +1,4 @@
-<?php include('menu.php'); ?>
+
 
 <?php
 // ---- RÉCUPÉRATION IP ETH1 ----
