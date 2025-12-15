@@ -2,7 +2,7 @@
 $pdo = new PDO(
     "mysql:host=localhost;dbname=box",
     "forumuser",
-    "TON_MOT_DE_PASSE"
+    "forum123"
 );
 
 echo "Connexion BOX OK";
