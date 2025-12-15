@@ -1,11 +1,18 @@
 <?php
-try{
+$host = "localhost";
+$dbname = "box";         
+$user = "forumuser";      
+$pass = "test"; 
+
+try {
     $pdo = new PDO(
-        "mysql:host=localhost;dbname=box;charset=utf8",
-        "forumuser",
-        "forum123"
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        $user,
+        $pass,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]
     );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-}catch(PDOException $e){
-    die("Erreur DB : ".$e->getMessage());
+} catch (PDOException $e) {
+    die("Erreur DB BOX : " . $e->getMessage());
 }
