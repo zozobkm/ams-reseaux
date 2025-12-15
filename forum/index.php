@@ -1,38 +1,9 @@
-<?php
-require_once 'db.php';
+<h2>Poster un message</h2>
 
-$sql = "
-    SELECT messages.contenu, messages.date_post, users.username
-    FROM messages
-    JOIN users ON messages.user_id = users.id
-    ORDER BY messages.date_post DESC
-";
-
-$stmt = $pdo->query($sql);
-$messages = $stmt->fetchAll();
-?>
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Forum</title>
-</head>
-<body>
-
-<h1>Forum</h1>
-
-<?php if(empty($messages)): ?>
-    <p>Aucun message pour le moment.</p>
-<?php else: ?>
-    <?php foreach($messages as $msg): ?>
-        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-            <strong><?= htmlspecialchars($msg['username']) ?></strong>
-            <em>(<?= $msg['date_post'] ?>)</em>
-            <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
-        </div>
-    <?php endforeach; ?>
-<?php endif; ?>
-
-</body>
-</html>
+<form method="post" action="post.php">
+    <input type="text" name="username" placeholder="Pseudo" required>
+    <br><br>
+    <textarea name="contenu" placeholder="Votre message" required></textarea>
+    <br><br>
+    <button type="submit">Envoyer</button>
+</form>
