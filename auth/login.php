@@ -1,41 +1,38 @@
 <?php
 session_start();
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . "/../config.php";
 
-/* Déjà connecté */
-if (isset($_SESSION["user_id"])) {
+if(isset($_SESSION["user_id"])){
     header("Location: /ams-reseaux/dashboard/index.php");
     exit;
 }
 
 $error = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if($_SERVER["REQUEST_METHOD"] === "POST"){
     $email = trim($_POST["email"] ?? "");
     $password = $_POST["password"] ?? "";
 
-    if ($email !== "" && $password !== "") {
-
-        $stmt = $pdo->prepare(
-            "SELECT id, email, password_hash, role 
-             FROM box_users 
-             WHERE email = ?"
+    if($email !== "" && $password !== ""){
+        $stmt = $pdo_box->prepare(
+            "SELECT id,email,password_hash,role FROM box_users WHERE email=?"
         );
         $stmt->execute([$email]);
         $u = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($u && password_verify($password, $u["password_hash"])) {
+        // 🔹 COMPARAISON SIMPLE (SANS HASH)
+        if($u && $password === $u["password_hash"]){
             $_SESSION["user_id"] = $u["id"];
-            $_SESSION["email"] = $u["email"];
-            $_SESSION["role"] = $u["role"];
-            $_SESSION["mode"] = "normal";
+            $_SESSION["email"]   = $u["email"];
+            $_SESSION["role"]    = $u["role"];
+            if(!isset($_SESSION["mode"])) $_SESSION["mode"] = "normal";
 
             header("Location: /ams-reseaux/dashboard/index.php");
             exit;
-        } else {
+        }else{
             $error = "Identifiants invalides.";
         }
-    } else {
+    }else{
         $error = "Remplis tous les champs.";
     }
 }
@@ -48,11 +45,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body class="page">
-
 <div class="card">
     <h1>Connexion Box</h1>
 
-    <?php if ($error !== ""): ?>
+    <?php if($error !== ""): ?>
         <div class="alert"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
@@ -64,6 +60,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <p class="muted">Si tu n’as pas de compte, demande à l’admin.</p>
 </div>
-
 </body>
 </html>
