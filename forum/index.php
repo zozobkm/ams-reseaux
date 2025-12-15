@@ -38,7 +38,7 @@ $messages = $stmt->fetchAll();
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
-h2>Poster un message</h2>
+<h2>Poster un message</h2>
 
 <form method="post" action="post.php">
     <input type="text" name="username" placeholder="Pseudo" required>
