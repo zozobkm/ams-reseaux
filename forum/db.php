@@ -1,7 +1,7 @@
 <?php
 try{
     $pdo = new PDO(
-        "mysql:host=localhost;dbname=forum;charset=utf8",
+        "mysql:host=localhost;dbname=box;charset=utf8",
         "forumuser",
         "forum123"
     );
