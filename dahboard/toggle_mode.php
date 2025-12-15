@@ -6,5 +6,5 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $_SESSION["mode"] = ($_SESSION["mode"] === "normal") ? "avance" : "normal";
-header("Location: /ams-reseaux/dashboard/index.php");
+header("Location: /ams-reseaux/dahboard/index.php");
 exit;
