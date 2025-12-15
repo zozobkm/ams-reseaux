@@ -50,4 +50,3 @@ $messages = $stmt->fetchAll();
 </body>
 </html>
 
-<
