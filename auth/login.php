@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . "/../config.php";
 
 if(isset($_SESSION["user_id"])){
-    header("Location: /ams-reseaux/dashboard/index.php");
+    header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
 
