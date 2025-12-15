@@ -2,7 +2,7 @@
 $host = "localhost";
 $dbname = "box";         
 $user = "forumuser";      
-$pass = "test"; 
+$pass = "forum123"; 
 
 try {
     $pdo = new PDO(
