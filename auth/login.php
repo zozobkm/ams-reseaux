@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once __DIR__."/../config.php";
+echo "DB FILE USED: " . realpath(__DIR__ . '/../forum/db.php');
+exit;
 
 if(isset($_SESSION["user_id"])){
     header("Location: /ams-reseaux/dashboard/index.php");
