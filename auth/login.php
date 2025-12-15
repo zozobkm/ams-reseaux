@@ -27,7 +27,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
             $_SESSION["role"]    = $u["role"];
             if(!isset($_SESSION["mode"])) $_SESSION["mode"] = "normal";
 
-            header("Location: /ams-reseaux/dashboard/index.php");
+            header("Location: /ams-reseaux/dahboard/index.php");
             exit;
         }else{
             $error = "Identifiants invalides.";
