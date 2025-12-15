@@ -1,54 +1,118 @@
-
 body{
-    font-family: Arial;
-    background:#f4f4f4;
-    padding:20px;
+    font-family:Arial,sans-serif;
+    margin:0;
+    background:#f6f7fb
 }
-
-.message{
-    background:white;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:5px;
-}
-
-textarea{
-    width:300px;
-    height:80px;
-}
-
-.menu {
-    background: #222;
-    color: white;
-    padding: 10px;
-}
-.menu a {
-    color: white;
-    margin-right: 15px;
-}
-nav{
-    background:#0078d7;
-    color:white;
-    padding:12px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+.topnav{
     position:fixed;
     top:0;
     left:0;
     width:100%;
-    z-index:1000;
+    display:flex;
+    gap:16px;
+    align-items:center;
+    padding:12px 16px;
+    background:#0078d7;
+    color:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+    z-index:999
 }
-body{padding-top:60px;}
-
-nav a{
-    color:white;
+.topnav a{
+    color:#fff;
     text-decoration:none;
-    margin:0 20px;
-    font-weight:bold;
-    transition:0.3s;
+    font-weight:bold
 }
-nav a:hover{
-    text-decoration:underline;
+.topnav a:hover{
+    text-decoration:underline
 }
+.spacer{
+    flex:1
+       }
+.badge{
+    background:rgba(255,255,255,.2);
+    padding:4px 10px;border-radius:999px
+}
+.logout{
+    background:rgba(0,0,0,.15);
+    padding:6px 10px;border-radius:8px
+}
+.container{
+    padding:80px 20px;
+    max-width:1100px;
+    margin:auto
+}
+.card{
+    background:#fff;
+    padding:16px;
+    border-radius:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:16px
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px
+}
+.tile{
+    display:block;
+    background:#fff;
+    padding:18px;border-radius:14px;
+    text-decoration:none;color:#111;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    text-align:center;
+    font-weight:bold
+}
+.tile.admin{
+    border:2px solid #0078d7
+}
+.row{display:flex;
+     gap:10px;flex-wrap:wrap
+    }
+.btn{
+    display:inline-block;
+     background:#0078d7;
+    color:#fff;padding:10px 14px;
+    border-radius:10px;
+    text-decoration:none
+}
+.btn:hover{
+    opacity:.9
+}
+.page{
+    padding:80px 20px}
+
+.card input,.card textarea{
+    width:100%;padding:10px;margin:8px 0;
+    border-radius:10px;
+    border:1px solid #ddd
+}
+.card button{
+    width:100%;
+    padding:10px;border-radius:10px;
+    border:0;
+    background:#0078d7;
+    color:#fff;
+    font-weight:bold
+}
+.alert{
+    background:#ffe8e8;
+       border:1px solid #ffb4b4;
+    padding:10px;
+    border-radius:10px;
+    margin:10px 0
+}
+.muted{
+    color:#666;f
+    ont-size:14px}
+
+.message{
+    background:#fff;
+    padding:12px;border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08)
+    ;margin:10px 0
+}
+
+
+
+
+
