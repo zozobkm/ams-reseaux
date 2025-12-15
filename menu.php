@@ -2,7 +2,7 @@
 if(session_status()===PHP_SESSION_NONE){session_start();}
 ?>
 <nav class="topnav">
-  <a href="/ams-reseaux/dashboard/index.php">Dashboard</a>
+  <a href="/ams-reseaux/dasboard/index.php">Dashboard</a>
   <a href="/ams-reseaux/services/dhcp.php">DHCP</a>
   <a href="/ams-reseaux/services/dns.php">DNS</a>
   <a href="/ams-reseaux/services/nat.php">NAT</a>
