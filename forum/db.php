@@ -1,16 +1,11 @@
 <?php
-$host = "localhost";
-$dbname = "forum";
-$user = "root";
-$pass = "";
-
 try{
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8",
-        $user,
-        $pass
+        "mysql:host=localhost;dbname=forum;charset=utf8",
+        "forumuser",
+        "forum123"
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }catch(PDOException $e){
-    die("Erreur DB : " . $e->getMessage());
+    die("Erreur DB : ".$e->getMessage());
 }
