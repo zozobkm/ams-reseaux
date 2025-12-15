@@ -1,19 +1,16 @@
 <?php
-session_start();
-require_once 'db.php';
-
-if (!isset($_SESSION['admin'])) {
-    die("Accès refusé");
+require_once __DIR__ . '/../auth/require_login.php';
+if(($_SESSION["role"]??"user")!=="admin"){
+    header("Location: /ams-reseaux/forum/index.php");
+    exit;
 }
 
-if (!isset($_POST['id'])) {
-    die("ID manquant");
+require_once __DIR__ . '/db.php';
+
+$id=(int)($_POST["id"]??0);
+if($id>0){
+    $stmt=$pdo->prepare("DELETE FROM messages WHERE id=?");
+    $stmt->execute([$id]);
 }
-
-$id = intval($_POST['id']);
-
-$stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
-$stmt->execute([$id]);
-
-header("Location: index.php");
+header("Location: /ams-reseaux/forum/index.php");
 exit;
