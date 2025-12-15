@@ -5,5 +5,5 @@ $mode=$_GET["mode"]??"normal";
 if($mode!=="normal" && $mode!=="avance") $mode="normal";
 $_SESSION["mode"]=$mode;
 
-header("Location: /ams-reseaux/dashboard/index.php");
+header("Location: /ams-reseaux/dahboard/index.php");
 exit;
