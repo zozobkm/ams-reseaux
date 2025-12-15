@@ -15,7 +15,8 @@ $messages = $stmt->fetchAll();
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+
     <meta charset="UTF-8">
     <title>Forum</title>
 </head>
