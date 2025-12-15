@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <title>Configuration DHCP</title>
+</head>
 
 <?php include('menu.php'); ?>
 
@@ -16,3 +23,4 @@ if (isset($_POST['activer'])) {
     echo "<hr><pre>$resultat</pre>";
 }
 ?>
+</html>
