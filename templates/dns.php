@@ -29,6 +29,7 @@ if(isset($_POST['configurer'])){
         echo "<p style='color:red;'>Erreur : domaine vide.</p>";
     }
 }
+
 ?>
 
 </body>
