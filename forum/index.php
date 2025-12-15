@@ -1,9 +1,6 @@
-
-
-
 <?php
+<?php include('menu.php'); 
 require_once 'db.php';
-
 $sql = "
     SELECT messages.contenu, messages.date_post, users.username
     FROM messages
