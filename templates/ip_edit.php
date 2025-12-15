@@ -3,17 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Modifier l'adresse IP</title>
-<style>
-body{font-family:Arial;background:#f4f4f4;padding:20px;text-align:center}
-h2{color:#333}
-form{background:white;padding:20px;margin:20px auto;border-radius:10px;width:420px;box-shadow:0 0 5px #ccc;text-align:left}
-label{display:block;margin-top:10px}
-input[type=text],input[type=number]{width:100%;padding:5px}
-input[readonly]{background:#eee;color:#555}
-input[type=submit]{margin-top:15px;background:#0078d7;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer}
-input[type=submit]:hover{background:#005fa3}
-pre{background:#eee;padding:10px;text-align:left;border-radius:5px}
-</style>
+<link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+
 </head>
  <?php include('menu.php'); ?>
 
