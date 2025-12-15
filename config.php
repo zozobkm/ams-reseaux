@@ -2,7 +2,7 @@
 $DB_HOST="localhost";
 $DB_NAME="box";
 $DB_USER="forumuser";
-$DB_PASS="test";
+$DB_PASS="forum123";
 
 try{
     $pdo_box=new PDO("mysql:host=".$DB_HOST.";dbname=".$DB_NAME.";charset=utf8",$DB_USER,$DB_PASS);
