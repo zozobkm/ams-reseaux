@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
     <title>Configuration DHCP</title>
 </head>
-
+<?php include('menu.php'); ?>
 
 <?php
 // ---- RÉCUPÉRATION IP ETH1 ----
