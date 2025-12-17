@@ -1,8 +1,12 @@
-
 <?php
 session_start();
 require_once __DIR__ . "/../auth/require_login.php";
 require_once __DIR__ . "/../config/db.php";
+
+// Vérification de la connexion à la base de données
+if (!$pdo) {
+    die("Erreur de connexion à la base de données.");
+}
 
 // Récupération des messages
 $sql = "
@@ -13,48 +17,30 @@ $sql = "
 ";
 
 $stmt = $pdo->query($sql);
+
+// Si la requête échoue
+if ($stmt === false) {
+    die("Erreur lors de la récupération des messages.");
+}
+
 $messages = $stmt->fetchAll();
 
-// Si l'on soumet un message
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contenu'])) {
-    $username = trim($_POST['username']);
-    $contenu  = trim($_POST['contenu']);
-
-    // On vérifie que les champs sont remplis
-    if ($username !== '' && $contenu !== '') {
-        // Vérification si l'utilisateur existe
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-
-        if (!$user) {
-            // Si l'utilisateur n'existe pas, on l'ajoute
-            $stmt = $pdo->prepare("INSERT INTO users(username,password) VALUES(?, '')");
-            $stmt->execute([$username]);
-            $user_id = $pdo->lastInsertId();
-        } else {
-            $user_id = $user['id'];
-        }
-
-        // On insère le message
-        $stmt = $pdo->prepare("INSERT INTO messages(user_id, contenu) VALUES(?, ?)");
-        $stmt->execute([$user_id, $contenu]);
-    }
-}
-
-// Mode admin
-$ADMIN_KEY = "admin123";
-if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
-    $_SESSION['admin'] = true;
-}
+// Débogage : Afficher les messages récupérés
+// echo '<pre>';
+// var_dump($messages);
+// echo '</pre>';
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>FORUM</title><link rel="stylesheet" href="/ams-reseaux/assets/style.css"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Forum</title>
+    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+</head>
 <body>
-<?php include __DIR__."/../menu.php"; ?>
-<div class="container">
+
+<?php include __DIR__ . "/../menu.php"; ?>
 
 <h1>Forum</h1>
 
