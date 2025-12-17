@@ -8,6 +8,17 @@ require_once __DIR__ . "/../auth/require_login.php";
     <meta charset="UTF-8">
     <title>Configuration DHCP</title>
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <style>
+        .confirmation {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 <?php include __DIR__ . "/../menu.php"; ?>
@@ -20,14 +31,7 @@ require_once __DIR__ . "/../auth/require_login.php";
     
     <hr>
     
-    <!-- Bouton pour passer du mode Normal au mode Avancé -->
-    <form method="post" action="toggle_mode.php">
-        <button type="submit">
-            Passer en mode <?= $_SESSION["mode"] === "normal" ? "Avancé" : "Normal" ?>
-        </button>
-    </form>
-
-    <hr>
+ 
 
     <!-- Si en mode avancé, afficher les options avancées -->
     <?php if ($_SESSION["mode"] === "avance"): ?>
@@ -62,10 +66,9 @@ require_once __DIR__ . "/../auth/require_login.php";
 
     <hr>
 
-    <!-- Résultat de la configuration -->
+    <!-- Affichage du résultat de la configuration -->
     <?php if ($resultat !== ""): ?>
-        <div>
-            <h4>Configuration DHCP appliquée</h4>
+        <div class="confirmation">
             <?= $resultat ?>
         </div>
     <?php endif; ?>
