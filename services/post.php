@@ -22,6 +22,7 @@ if (!$user) {
 } else {
     // Utilisateur trouvé
     $user_id = $user['id'];
+    
 }
 
 /* Insérer le message */
