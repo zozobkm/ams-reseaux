@@ -1,0 +1,12 @@
+<?php
+$host = 'localhost';
+$dbname = 'box';       // Nom de la base de données (box)
+$user = 'forumuser';   // Utilisateur
+$pass = 'forum123';    // Mot de passe
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
