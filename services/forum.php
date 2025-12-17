@@ -56,7 +56,6 @@ if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
 <?php include __DIR__."/../menu.php"; ?>
 <div class="container">
 
-
 <h1>Forum</h1>
 
 <!-- Formulaire mode admin -->
