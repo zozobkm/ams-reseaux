@@ -4,7 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once __DIR__ . "/../auth/require_login.php";
-
+require_once __DIR__ . '/../config/db.php';
 // Récupération des messages
 $sql = "SELECT messages.id, messages.contenu, messages.date_post, users.username
         FROM messages
