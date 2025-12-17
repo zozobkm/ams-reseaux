@@ -1,15 +1,16 @@
 <?php
-session_start();
-require_once __DIR__ . "/../auth/require_login.php";  // Connexion à la base de données et validation
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Connexion à la base de données
-require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/../auth/require_login.php";
 
 // Récupération des messages
 $sql = "SELECT messages.id, messages.contenu, messages.date_post, users.username
         FROM messages
         JOIN users ON messages.user_id = users.id
         ORDER BY messages.date_post DESC";
+
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
@@ -22,8 +23,7 @@ $messages = $stmt->fetchAll();
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
-
-<?php include __DIR__ . "/../menu.php"; ?> <!-- Inclure le menu -->
+<?php include __DIR__ . "/../menu.php"; ?>
 
 <div class="container">
     <h1>Forum</h1>
@@ -37,8 +37,6 @@ $messages = $stmt->fetchAll();
                 <strong><?= htmlspecialchars($msg['username']) ?></strong>
                 <em>(<?= $msg['date_post'] ?>)</em>
                 <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
-
-                <!-- Si l'utilisateur est admin, il peut supprimer le message -->
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
                     <form method="post" action="delete.php">
                         <input type="hidden" name="id" value="<?= $msg['id'] ?>">
@@ -51,13 +49,13 @@ $messages = $stmt->fetchAll();
 
     <hr>
 
-    <!-- Formulaire pour poster un message -->
     <h2>Poster un message</h2>
     <form method="post" action="post.php">
         <input type="text" name="username" placeholder="Pseudo" required><br><br>
         <textarea name="contenu" placeholder="Votre message" required></textarea><br><br>
         <button type="submit">Envoyer</button>
     </form>
+
 </div>
 
 </body>
