@@ -1,47 +1,52 @@
 <?php
 session_start();
-require_once __DIR__."/../auth/require_login.php";
+require_once __DIR__ . "/../auth/require_login.php";
+
+// Déclaration des variables
+$resultat = "";
+
+// Si le formulaire est soumis pour configurer DNS
+if (isset($_POST['configurer'])) {
+    // Récupération du domaine DNS
+    $domaine = trim($_POST['domaine']);
+    
+    // Exécution de la commande DNS
+    $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dns.sh $domaine";
+    $resultat = shell_exec($cmd . " 2>&1");
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>DNS</title>
+    <title>Configuration DNS</title>
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
-<?php include __DIR__."/../menu.php"; ?>
+<?php include __DIR__ . "/../menu.php"; ?>
 
 <div class="container">
-    <h1>DNS Configuration</h1>
+    <h1>Configuration DNS</h1>
     <p>Mode actuel : <strong><?= htmlspecialchars($_SESSION["mode"]) ?></strong></p>
 
-    <?php if ($_SESSION["mode"] === "avance"): ?>
-        <!-- Zone avancée -->
-        <div class="card">
-            <h3>Configuration avancée DNS</h3>
-            <form method="post" action="apply_dns_advanced.php">
-                <!-- Champs pour gestion des enregistrements DNS -->
-                <label for="dns_record">Enregistrement A (ex : www.example.com):</label>
-                <input type="text" name="dns_record" id="dns_record" placeholder="Nom d'hôte" required>
-                <label for="ip_address">Adresse IP:</label>
-                <input type="text" name="ip_address" id="ip_address" placeholder="Adresse IP" required>
-                <button type="submit">Appliquer la configuration avancée</button>
-            </form>
-        </div>
-    <?php else: ?>
-        <!-- Zone normal -->
-        <div class="card">
-            <h3>Configuration DNS simplifiée</h3>
-            <form method="post" action="apply_dns_simple.php">
-                <!-- Configuration DNS basique -->
-                <label for="dns_server">Serveur DNS principal :</label>
-                <input type="text" name="dns_server" id="dns_server" placeholder="DNS primaire" required>
-                <button type="submit">Appliquer</button>
-            </form>
+    <!-- Formulaire pour configurer le DNS -->
+    <form method="post">
+        <label for="domaine">Nom de domaine :</label>
+        <input type="text" name="domaine" required><br><br>
+
+        <button type="submit" name="configurer">Configurer</button>
+    </form>
+
+    <?php if ($resultat !== ""): ?>
+        <!-- Affichage du résultat de la commande -->
+        <div class="confirmation">
+            <h3>Résultat de la configuration DNS :</h3>
+            <pre><?= htmlspecialchars($resultat) ?></pre>
         </div>
     <?php endif; ?>
 </div>
+
 </body>
-    
 </html>
