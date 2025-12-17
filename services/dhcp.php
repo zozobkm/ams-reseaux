@@ -1,88 +1,74 @@
 <?php
-require_once __DIR__."/../auth/require_login.php";
+require_once __DIR__ . "/../auth/require_login.php";
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>DHCP</title>
+    <title>Configuration DHCP</title>
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
-<?php include __DIR__."/../menu.php"; ?>
+<?php include __DIR__ . "/../menu.php"; ?>
 
 <div class="container">
     <h1>Configuration DHCP</h1>
-    <p>Mode actuel : <strong><?= htmlspecialchars($_SESSION["mode"]) ?></strong></p>
-
-    <?php
-    // Définir les valeurs par défaut pour la plage IP
-    $ip_parts = explode(".", $_SERVER['SERVER_ADDR']);
-    $default_start_ip = "{$ip_parts[0]}.{$ip_parts[1]}.{$ip_parts[2]}.10";
-    $default_end_ip = "{$ip_parts[0]}.{$ip_parts[1]}.{$ip_parts[2]}.50";
-
-    $resultat = "";
-
-    // Si le formulaire de mode avancé est soumis
-    if (isset($_POST['manuel'])) {
-        $debut = trim($_POST['debut']);
-        $fin = trim($_POST['fin']);
-
-        if ($debut === "" || $fin === "") {
-            $resultat = "<span style='color:red;'>Erreur : les champs ne peuvent pas être vides.</span>";
-        } else {
-            // Exécuter le script pour configurer le DHCP manuellement
-            $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh ".
-                   "192.168.1.0 255.255.255.0 $debut $fin 192.168.1.1";
-            $log = shell_exec($cmd . " 2>&1");
-
-            $resultat = "<b>Mode avancé appliqué :</b><br>Plage : $debut → $fin<br><pre>$log</pre>";
-        }
-    }
-
-    // Si le formulaire de mode automatique est soumis
-    if (isset($_POST['auto'])) {
-        $nb = intval($_POST['nb']);
-        if ($nb > 0) {
-            $debut = $default_start_ip;
-            $fin = "{$ip_parts[0]}.{$ip_parts[1]}.{$ip_parts[2]}." . (10 + $nb);
-            
-            // Exécuter le script pour configurer le DHCP automatiquement
-            $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh ".
-                   "192.168.1.0 255.255.255.0 $debut $fin 192.168.1.1";
-            $log = shell_exec($cmd . " 2>&1");
-
-            $resultat = "<b>Mode automatique appliqué :</b><br>Plage : $debut → $fin<br><pre>$log</pre>";
-        }
-    }
-    ?>
-
-    <!-- Formulaire de configuration DHCP automatique -->
-    <h2>Configuration DHCP automatique</h2>
-    <form method="post">
-        <label>Nombre d'appareils :</label>
-        <input type="number" name="nb" min="1" required>
-        <button type="submit" name="auto">Appliquer</button>
+    
+    <!-- Affichage du mode actuel -->
+    <p>Vous êtes actuellement en mode : <strong><?= htmlspecialchars($_SESSION["mode"] === "avance" ? "Avancé" : "Normal") ?></strong></p>
+    
+    <hr>
+    
+    <!-- Bouton pour passer du mode Normal au mode Avancé -->
+    <form method="post" action="toggle_mode.php">
+        <button type="submit">
+            Passer en mode <?= $_SESSION["mode"] === "normal" ? "Avancé" : "Normal" ?>
+        </button>
     </form>
 
     <hr>
 
-    <!-- Formulaire de configuration DHCP manuelle (mode avancé) -->
-    <h2>Configuration DHCP manuelle (mode avancé)</h2>
-    <form method="post">
-        <label>Début de la plage :</label>
-        <input type="text" name="debut" value="<?= $default_start_ip ?>" required><br>
+    <!-- Si en mode avancé, afficher les options avancées -->
+    <?php if ($_SESSION["mode"] === "avance"): ?>
+        <div class="card">
+            <h3>Configuration Avancée de votre réseau (DHCP)</h3>
+            <p>Dans ce mode, vous pouvez définir précisément la plage d'adresses IP attribuées à vos appareils.</p>
+            <p>Assurez-vous de bien comprendre vos besoins avant de configurer.</p>
+        </div>
+    <?php endif; ?>
 
-        <label>Fin de la plage :</label>
-        <input type="text" name="fin" value="<?= $default_end_ip ?>" required><br><br>
+    <!-- Zone normale avec options simples -->
+    <div class="card">
+        <h3>Configurer la plage d’adresses pour vos appareils</h3>
+        <p>Si vous ne savez pas ce que c’est, laissez les paramètres par défaut.</p>
 
-        <button type="submit" name="manuel">Appliquer</button>
-    </form>
+        <form method="post">
+            <?php if ($_SESSION["mode"] === "normal"): ?>
+                <!-- Mode Normal -->
+                <p>Le serveur DHCP attribuera des adresses IP à vos appareils dans cette plage : <strong>192.168.1.10 à 192.168.1.50</strong></p>
+                <button type="submit" name="auto">Appliquer</button>
+            <?php elseif ($_SESSION["mode"] === "avance"): ?>
+                <!-- Mode Avancé -->
+                <label for="debut">Plage de début :</label>
+                <input type="text" name="debut" value="192.168.1.10" required>
+                <br><br>
+                <label for="fin">Plage de fin :</label>
+                <input type="text" name="fin" value="192.168.1.50" required>
+                <br><br>
+                <button type="submit" name="manuel">Appliquer</button>
+            <?php endif; ?>
+        </form>
+    </div>
 
-    <!-- Affichage du résultat -->
+    <hr>
+
+    <!-- Résultat de la configuration -->
     <?php if ($resultat !== ""): ?>
-        <hr><div><?= $resultat ?></div>
+        <div>
+            <h4>Configuration DHCP appliquée</h4>
+            <?= $resultat ?>
+        </div>
     <?php endif; ?>
 </div>
 
