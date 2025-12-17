@@ -20,6 +20,7 @@ $sql = "
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
