@@ -45,17 +45,16 @@ require_once __DIR__ . "/../auth/require_login.php";
 
         <form method="post">
             <?php if ($_SESSION["mode"] === "normal"): ?>
-                <!-- Mode Normal -->
-                <p>Le serveur DHCP attribuera des adresses IP à vos appareils dans cette plage : <strong>192.168.1.10 à 192.168.1.50</strong></p>
+                <!-- Mode Normal : Demander le nombre d'appareils -->
+                <label for="nb">Nombre d'appareils :</label>
+                <input type="number" name="nb" min="1" required><br><br>
                 <button type="submit" name="auto">Appliquer</button>
             <?php elseif ($_SESSION["mode"] === "avance"): ?>
                 <!-- Mode Avancé -->
                 <label for="debut">Plage de début :</label>
-                <input type="text" name="debut" value="192.168.1.10" required>
-                <br><br>
+                <input type="text" name="debut" value="192.168.1.10" required><br><br>
                 <label for="fin">Plage de fin :</label>
-                <input type="text" name="fin" value="192.168.1.50" required>
-                <br><br>
+                <input type="text" name="fin" value="192.168.1.50" required><br><br>
                 <button type="submit" name="manuel">Appliquer</button>
             <?php endif; ?>
         </form>
