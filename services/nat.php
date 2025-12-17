@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__."/../auth/require_login.php";
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
