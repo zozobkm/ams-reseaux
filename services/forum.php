@@ -21,14 +21,16 @@ $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
 
+<?php
+require_once __DIR__."/../auth/require_login.php";
+?>
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Forum</title>
-    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
-</head>
+<head><meta charset="UTF-8"><title>FORUM</title><link rel="stylesheet" href="/ams-reseaux/assets/style.css"></head>
 <body>
+<?php include __DIR__."/../menu.php"; ?>
+<div class="container">
+
 
 <?php include __DIR__ . '/menu.php'; ?>
 
