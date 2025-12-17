@@ -1,9 +1,7 @@
-
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-require_once __DIR__ . "/../config/db.php";
 
 require_once __DIR__ . "/../auth/require_login.php";
 
@@ -12,6 +10,7 @@ $sql = "SELECT messages.id, messages.contenu, messages.date_post, users.username
         FROM messages
         JOIN users ON messages.user_id = users.id
         ORDER BY messages.date_post DESC";
+
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
