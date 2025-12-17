@@ -1,20 +1,25 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start();
+require_once 'db.php';
 
-require_once __DIR__ . "/../auth/require_login.php";
-require_once __DIR__ . '/../config/db.php';
-// Récupération des messages
-$sql = "SELECT messages.id, messages.contenu, messages.date_post, users.username
-        FROM messages
-        JOIN users ON messages.user_id = users.id
-        ORDER BY messages.date_post DESC";
+/* ===== MODE ADMIN ===== */
+$ADMIN_KEY = "admin123";
+
+if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
+    $_SESSION['admin'] = true;
+}
+
+/* ===== RÉCUPÉRATION DES MESSAGES ===== */
+$sql = "
+    SELECT messages.id, messages.contenu, messages.date_post, users.username
+    FROM messages
+    JOIN users ON messages.user_id = users.id
+    ORDER BY messages.date_post DESC
+";
 
 $stmt = $pdo->query($sql);
 $messages = $stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -23,40 +28,59 @@ $messages = $stmt->fetchAll();
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
-<?php include __DIR__ . "/../menu.php"; ?>
 
-<div class="container">
-    <h1>Forum</h1>
+<?php include __DIR__ . '/menu.php'; ?>
 
-    <!-- Affichage des messages -->
-    <?php if (empty($messages)): ?>
-        <p>Aucun message pour le moment.</p>
-    <?php else: ?>
-        <?php foreach ($messages as $msg): ?>
-            <div class="message">
-                <strong><?= htmlspecialchars($msg['username']) ?></strong>
-                <em>(<?= $msg['date_post'] ?>)</em>
-                <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
-                    <form method="post" action="delete.php">
-                        <input type="hidden" name="id" value="<?= $msg['id'] ?>">
-                        <button type="submit">Supprimer</button>
-                    </form>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+<h1>Forum</h1>
 
-    <hr>
-
-    <h2>Poster un message</h2>
-    <form method="post" action="post.php">
-        <input type="text" name="username" placeholder="Pseudo" required><br><br>
-        <textarea name="contenu" placeholder="Votre message" required></textarea><br><br>
-        <button type="submit">Envoyer</button>
+<!-- ===== FORMULAIRE MODE ADMIN ===== -->
+<?php if (!isset($_SESSION['admin'])): ?>
+    <form method="post">
+        <input type="password" name="admin_key" placeholder="Clé admin">
+        <button type="submit">Activer mode admin</button>
     </form>
+<?php else: ?>
+    <p><strong>Mode administrateur activé</strong></p>
 
-</div>
+    <form method="post" action="logout_admin.php">
+        <button type="submit">Quitter le mode admin</button>
+    </form>
+<?php endif; ?>
+
+
+<hr>
+
+<!-- ===== AFFICHAGE DES MESSAGES ===== -->
+<?php if (empty($messages)): ?>
+    <p>Aucun message pour le moment.</p>
+<?php else: ?>
+    <?php foreach ($messages as $msg): ?>
+        <div class="message">
+            <strong><?= htmlspecialchars($msg['username']) ?></strong>
+            <em>(<?= $msg['date_post'] ?>)</em>
+
+            <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
+
+            <?php if (isset($_SESSION['admin'])): ?>
+                <form method="post" action="delete.php">
+                    <input type="hidden" name="id" value="<?= $msg['id'] ?>">
+                    <button type="submit">Supprimer</button>
+                </form>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<hr>
+
+<!-- ===== AJOUT DE MESSAGE ===== -->
+<h2>Poster un message</h2>
+
+<form method="post" action="post.php">
+    <input type="text" name="username" placeholder="Pseudo" required><br><br>
+    <textarea name="contenu" placeholder="Votre message" required></textarea><br><br>
+    <button type="submit">Envoyer</button>
+</form>
 
 </body>
 </html>
