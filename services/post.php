@@ -1,33 +1,36 @@
 <?php
-require_once 'db.php';
+require_once 'db.php'; // Connexion locale 
 
-// Récupération des informations
-$username = trim($_POST['username']);
-$contenu  = trim($_POST['contenu']);
+$username = trim($_POST['username'] ?? '');
+$contenu  = trim($_POST['contenu'] ?? '');
 
 if ($username === '' || $contenu === '') {
-    die("Champs invalides");
+    die("Erreur : Tous les champs sont obligatoires.");
 }
 
-/* Vérifier l'existence de l'utilisateur */
-$stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-$stmt->execute([$username]);
-$user = $stmt->fetch();
-
-if (!$user) {
-    // Si l'utilisateur n'existe pas, le créer
-    $stmt = $pdo->prepare("INSERT INTO users(username, password) VALUES(?, '')");
+try {
+    /* 1. Vérifier si l'utilisateur existe déjà */
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$username]);
-    $user_id = $pdo->lastInsertId();
-} else {
-    // Utilisateur trouvé
-    $user_id = $user['id'];
-    
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        /* 2. S'il n'existe pas, on le crée (mot de passe vide par défaut) */
+        $stmt = $pdo->prepare("INSERT INTO users(username, password) VALUES(?, '')");
+        $stmt->execute([$username]);
+        $user_id = $pdo->lastInsertId();
+    } else {
+        $user_id = $user['id'];
+    }
+
+    /* 3. Insérer le message lié à cet utilisateur */
+    $stmt = $pdo->prepare("INSERT INTO messages(user_id, contenu, date_post) VALUES(?, ?, NOW())");
+    $stmt->execute([$user_id, $contenu]);
+
+    /* 4. Retour au forum */
+    header("Location: forum.php");
+    exit;
+
+} catch (Exception $e) {
+    die("Erreur base de données : " . $e->getMessage());
 }
-
-/* Insérer le message */
-$stmt = $pdo->prepare("INSERT INTO messages(user_id, contenu) VALUES(?, ?)");
-$stmt->execute([$user_id, $contenu]);
-
-header("Location: index.php");
-exit;
