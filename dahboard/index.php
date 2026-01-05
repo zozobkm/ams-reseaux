@@ -9,7 +9,7 @@ if (!isset($_SESSION["user_id"])) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - ILLIPBOX</title>
+    <title>CeriBOX</title>
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
 </head>
 <body>
