@@ -1,15 +1,20 @@
 <?php
-$host = 'localhost';
-$dbname = 'box';  // Assurez-vous que la base de données est correcte
-$user = 'forumuser';
-$pass = 'forum123';
+/**
+ * Fichier de liaison pour la base de données
+ * Ce fichier appelle la configuration centrale à la racine
+ */
 
-try {
-    // Crée une nouvelle connexion PDO à la base de données
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Active la gestion des erreurs
-} catch (PDOException $e) {
-    // Si une erreur se produit, elle sera affichée
-    die("Erreur de connexion à la base de données : " . $e->getMessage());
+// On remonte d'un dossier pour trouver le fichier config.php principal
+require_once __DIR__ . "/../config.php";
+
+/**
+ * Pour assurer la compatibilité avec tes anciens fichiers :
+ * On crée l'alias $pdo qui pointe vers $pdo_box (défini dans config.php)
+ */
+if (isset($pdo_box)) {
+    $pdo = $pdo_box;
+} else {
+    // Sécurité au cas où config.php n'est pas trouvé
+    die("Erreur : La configuration principale (config.php) est introuvable.");
 }
 ?>
