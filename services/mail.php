@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__."/../auth/require_login.php";
 
+if (isset($_POST['creer_compte']) && $_SESSION["mode"] === "avance") {
+    $nouveau_user = escapeshellarg(trim($_POST['nom_utilisateur']));
+    $res = shell_exec("sudo /var/www/html/ams-reseaux/scripts/config_mail.sh add $nouveau_user 2>&1");
+    echo "<div class='card'>$res</div>";
+}
+
 $status_postfix = shell_exec("systemctl is-active postfix");
 $is_avance = ($_SESSION["mode"] ?? "normal") === "avance";
 
