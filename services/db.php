@@ -1,14 +1,9 @@
 <?php
-$host = 'localhost';
-$dbname = 'box';       // Nom de la base de données
-$user = 'forumuser';   // Utilisateur de la base de données
-$pass = 'forum123';    // Mot de passe pour l'utilisateur
+// On utilise le chemin relatif pour atteindre config.php à la racine
+require_once __DIR__ . "/../config.php";
 
-try {
-    // Connexion PDO à la base de données
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erreur de connexion : " . $e->getMessage());  // Afficher l'erreur si la connexion échoue
-}
+/** * On crée l'alias $pdo pour ne pas avoir à modifier 
+ * tes autres fichiers (forum.php, post.php, etc.)
+ */
+$pdo = $pdo_box; 
 ?>
