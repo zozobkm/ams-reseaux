@@ -5,7 +5,7 @@ $current_mode = $_SESSION["mode"] ?? "normal";
 ?>
 <div class="sidebar">
     <div class="sidebar-header">
-        <h2>ILLIPBOX</h2>
+        <h2>CeriBOX</h2>
         <span class="badge-mode"><?= htmlspecialchars($current_mode) ?></span>
     </div>
     
