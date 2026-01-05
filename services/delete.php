@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../auth/require_login.php';
+// Seul l'admin peut supprimer
 if(($_SESSION["role"]??"user")!=="admin"){
-    header("Location: /ams-reseaux/forum/index.php");
+    header("Location: forum.php");
     exit;
 }
 
@@ -12,5 +13,6 @@ if($id>0){
     $stmt=$pdo->prepare("DELETE FROM messages WHERE id=?");
     $stmt->execute([$id]);
 }
-header("Location: /ams-reseaux/forum/index.php");
+// Redirection vers le forum centralisé
+header("Location: forum.php");
 exit;
