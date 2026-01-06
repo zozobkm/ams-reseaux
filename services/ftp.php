@@ -1,30 +1,26 @@
 <?php
-// 1. FORCER L'AFFICHAGE DES ERREURS
+// 1. On affiche les erreurs au cas où
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-
-// 2. VÉRIFIER LA CONNEXION (Assure-toi que db.php est présent dans le dossier services)
-if (!file_exists('db.php')) {
-    die("Erreur fatale : Le fichier 'services/db.php' est introuvable.");
-}
 require_once 'db.php'; 
 
-/* ===== LOGIQUE DE MESURE DE DÉBIT ===== */
 $message_debit = "";
+
+/* ===== LOGIQUE DE TEST DE DÉBIT ===== */
 if (isset($_POST['run_test'])) {
     $taille_mo = 10; 
-    $temps_sec = rand(2, 8); 
+    $temps_sec = rand(2, 6); // Simulation du temps de téléchargement
     $debit_mbps = round(($taille_mo * 8) / $temps_sec, 2); 
 
     try {
+        // Insertion dans la table que tu viens de créer
         $stmt = $pdo->prepare("INSERT INTO tests_debit (taille_mo, temps_sec, debit_mbps) VALUES (?, ?, ?)");
         $stmt->execute([$taille_mo, $temps_sec, $debit_mbps]);
-        $message_debit = "Test réussi : $debit_mbps Mbps";
+        $message_debit = "Succès ! Débit mesuré : " . $debit_mbps . " Mbps";
     } catch (PDOException $e) {
-        $message_debit = "Erreur SQL (Insertion) : " . $e->getMessage();
+        $message_debit = "Erreur lors de l'enregistrement : " . $e->getMessage();
     }
 }
 
@@ -35,8 +31,7 @@ try {
     $stmt = $pdo->query($sql);
     $historique = $stmt->fetchAll();
 } catch (PDOException $e) {
-    // Si la table n'existe pas, on affiche l'erreur ici
-    $error_sql = "La table 'tests_debit' est introuvable. Avez-vous exécuté la commande SQL ?";
+    $error_sql = "Erreur de lecture de la table.";
 }
 ?>
 
@@ -48,54 +43,53 @@ try {
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-    <?php 
-    $menu_path = __DIR__ . '/../menu.php';
-    if (file_exists($menu_path)) {
-        include $menu_path;
-    } else {
-        echo "<div style='color:red; margin-left:260px;'>Erreur : menu.php introuvable dans " . dirname(__DIR__) . "</div>";
-    }
-    ?>
+    <?php if (file_exists(__DIR__ . '/../menu.php')) include __DIR__ . '/../menu.php'; ?>
 
     <div class="main-content" style="margin-left: 260px; padding: 30px;">
-        <h1>Services Applicatifs : FTP & Débit</h1>
+        <div class="header">
+            <h1>Services Applicatifs : FTP & Débit</h1>
+            <span class="mode-badge" style="background:#3498db; color:white; padding:5px 15px; border-radius:20px;">Mode Normal</span>
+        </div>
 
-        <?php if (isset($error_sql)): ?>
-            <div style="background:#ffcdd2; color:#b71c1c; padding:20px; border-radius:8px; margin-bottom:20px;">
-                <strong>Attention :</strong> <?= $error_sql ?>
-                <br><br>
-                <em>Tapez ceci dans MariaDB :</em><br>
-                <code>CREATE TABLE tests_debit (id INT AUTO_INCREMENT PRIMARY KEY, date_test DATETIME DEFAULT CURRENT_TIMESTAMP, taille_mo FLOAT, temps_sec FLOAT, debit_mbps FLOAT);</code>
-            </div>
-        <?php endif; ?>
-
-        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px;">
-            <h3>Lancer un test</h3>
+        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px;">
+            <h3>Lancer une mesure de débit</h3>
+            <p>Ce test simule le téléchargement d'un fichier de 10 Mo via le protocole FTP pour calculer la vitesse de votre ligne.</p>
+            
             <form method="post">
-                <button type="submit" name="run_test" style="background:#3498db; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer;">
+                <button type="submit" name="run_test" style="background:#3498db; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer; font-weight:bold;">
                     Tester le débit maintenant
                 </button>
             </form>
+
             <?php if ($message_debit): ?>
-                <p style="margin-top:10px; color:#2980b9;"><strong><?= $message_debit ?></strong></p>
+                <div style="margin-top:20px; padding:15px; background:#e8f5e9; color:#2e7d32; border-radius:5px; font-weight:bold;">
+                    <?= $message_debit ?>
+                </div>
             <?php endif; ?>
         </div>
 
-        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <h3>Historique</h3>
-            <table style="width:100%; text-align:left;">
-                <thead>
-                    <tr><th>Date</th><th>Débit</th></tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($historique as $test): ?>
-                        <tr>
-                            <td><?= $test['date_test'] ?></td>
-                            <td><?= $test['debit_mbps'] ?> Mbps</td>
+        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <h3>Historique des 5 derniers tests</h3>
+            <?php if (empty($historique)): ?>
+                <p style="color:gray; font-style:italic;">Aucun test enregistré pour le moment. Cliquez sur le bouton ci-dessus !</p>
+            <?php else: ?>
+                <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+                    <thead>
+                        <tr style="text-align:left; border-bottom:2px solid #f4f7f6;">
+                            <th style="padding:10px;">Date et Heure</th>
+                            <th style="padding:10px;">Débit (Mbps)</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($historique as $test): ?>
+                            <tr style="border-bottom:1px solid #f4f7f6;">
+                                <td style="padding:10px;"><?= $test['date_test'] ?></td>
+                                <td style="padding:10px; font-weight:bold; color:#2c3e50;"><?= $test['debit_mbps'] ?> Mbps</td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
         </div>
     </div>
 </body>
