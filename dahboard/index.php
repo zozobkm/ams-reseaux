@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 <head>
     <meta charset="UTF-8">
     <title>CeriBOX</title>
-    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 
