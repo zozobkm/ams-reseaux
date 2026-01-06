@@ -2,30 +2,39 @@
 # Usage: ./config_ftp.sh [upload|download]
 
 ACTION=$1
-SERVEUR_FAI="192.168.20.2" # Adresse IP du serveur distant (FAI)
+# Utilisation de ton domaine DNS local pour la démo
+SERVEUR_FTP="ftp.ceri.com" 
 USER="ftpuser"
 PASS="ftp123"
 FICHIER_TEST="/tmp/test_debit.dat"
 
-# Créer un fichier de 10Mo pour le test si nécessaire
+# 1. Création du fichier de test de 10Mo si absent
 if [ ! -f $FICHIER_TEST ]; then
-    dd if=/dev/zero of=$FICHIER_TEST bs=1M count=10
+    echo "📦 Création du fichier de test..."
+    dd if=/dev/zero of=$FICHIER_TEST bs=1M count=10 2>/dev/null
 fi
 
+# 2. Lancement du test de débit
 if [ "$ACTION" == "upload" ]; then
-    echo "🚀 Test d'envoi (Upload) en cours..."
-    # Mesure du temps avec la commande 'time'
+    echo "🚀 Test d'envoi (Upload) vers $SERVEUR_FTP..."
     START=$(date +%s.%N)
-    curl -T $FICHIER_TEST ftp://$SERVEUR_FAI/ --user $USER:$PASS
+    curl -T $FICHIER_TEST ftp://$SERVEUR_FTP/ --user $USER:$PASS
     END=$(date +%s.%N)
 elif [ "$ACTION" == "download" ]; then
-    echo "📥 Test de réception (Download) en cours..."
+    echo "📥 Test de réception (Download) depuis $SERVEUR_FTP..."
     START=$(date +%s.%N)
-    curl -o /dev/null ftp://$SERVEUR_FAI/test_10M.dat --user $USER:$PASS
+    # Téléchargement vers /dev/null pour mesurer uniquement le débit
+    curl -o /dev/null ftp://$SERVEUR_FTP/test_10M.dat --user $USER:$PASS
     END=$(date +%s.%N)
+else
+    echo "❌ Usage: $0 [upload|download]"
+    exit 1
 fi
 
-# Calcul de la vitesse
+# 3. Calcul de la vitesse (nécessite le paquet 'bc')
 DIFF=$(echo "$END - $START" | bc)
 VITESSE=$(echo "scale=2; 10 / $DIFF" | bc)
-echo "✅ Terminé en $DIFF secondes. Débit : $VITESSE Mo/s"
+
+echo "---"
+echo "✅ Terminé en $DIFF secondes."
+echo "📈 Débit : $VITESSE Mo/s"
