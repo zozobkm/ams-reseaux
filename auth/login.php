@@ -83,7 +83,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 </head>
 <body class="login-page">
     <div class="login-card">
-        <h1>ILLIPBOX</h1>
+        <h1>CeriBOX</h1>
         <p style="text-align: center; color: #64748b; margin-top: -20px; margin-bottom: 30px;">Administration Réseau</p>
 
         <?php if($error !== ""): ?>
