@@ -1,18 +1,23 @@
 <?php
-require_once __DIR__ . '/../auth/require_login.php';
-// Seul l'admin peut supprimer
-if(($_SESSION["role"]??"user")!=="admin"){
-    header("Location: forum.php");
-    exit;
+session_start();
+require_once 'db.php';
+
+// Sécurité : on vérifie que l'utilisateur est bien admin
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+    die("Accès refusé : vous devez être administrateur.");
 }
 
-require_once __DIR__ . '/db.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+    $id = intval($_POST['id']);
 
-$id=(int)($_POST["id"]??0);
-if($id>0){
-    $stmt=$pdo->prepare("DELETE FROM messages WHERE id=?");
-    $stmt->execute([$id]);
+    try {
+        // Suppression du message dans ta table messages
+        $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
+        $stmt->execute([$id]);
+
+        header('Location: forum.php');
+        exit();
+    } catch (PDOException $e) {
+        die("Erreur de suppression : " . $e->getMessage());
+    }
 }
-// Redirection vers le forum centralisé
-header("Location: forum.php");
-exit;
