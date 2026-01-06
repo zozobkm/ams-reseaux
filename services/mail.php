@@ -85,7 +85,7 @@ if ($is_avance) {
                         <?php foreach ($comptes_mail as $user): if(!$user) continue; ?>
                         <tr style="border-bottom: 1px solid #f9f9f9;">
                             <td style="padding: 10px;"><strong><?= htmlspecialchars($user) ?></strong></td>
-                            <td style="padding: 10px; color: #7f8c8d;"><?= htmlspecialchars($user) ?>@illipbox.lan</td>
+                            <td style="padding: 10px; color: #7f8c8d;"><?= htmlspecialchars($user) ?>@Ceripbox.lan</td>
                             <td style="padding: 10px;"><span style="color: #27ae60;">Compte Actif</span></td>
                         </tr>
                         <?php endforeach; ?>
