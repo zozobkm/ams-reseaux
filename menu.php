@@ -8,7 +8,7 @@ $role = $_SESSION["role"] ?? "user";
 ?>
 <div class="sidebar">
     <div class="sidebar-header">
-        <h2>CeriPBOX</h2>
+        <h2>CeriBOX</h2>
         <span class="badge-mode"><?= htmlspecialchars(strtoupper($current_mode)) ?></span>
     </div>
     
