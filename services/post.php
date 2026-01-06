@@ -1,36 +1,36 @@
 <?php
-require_once 'db.php'; // Connexion locale 
+session_start();
+require_once 'db.php';
 
-$username = trim($_POST['username'] ?? '');
-$contenu  = trim($_POST['contenu'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'], $_POST['contenu'])) {
+    $username = trim($_POST['username']);
+    $contenu = trim($_POST['contenu']);
 
-if ($username === '' || $contenu === '') {
-    die("Erreur : Tous les champs sont obligatoires.");
-}
+    if (!empty($username) && !empty($contenu)) {
+        try {
+            // 1. Chercher si l'utilisateur existe déjà dans box_users
+            $stmt = $pdo->prepare("SELECT id FROM box_users WHERE username = ?");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
 
-try {
-    /* 1. Vérifier si l'utilisateur existe déjà */
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
+            if ($user) {
+                $user_id = $user['id'];
+            } else {
+                // 2. Créer l'utilisateur s'il n'existe pas pour éviter l'erreur de clé étrangère
+                $stmt = $pdo->prepare("INSERT INTO box_users (username) VALUES (?)");
+                $stmt->execute([$username]);
+                $user_id = $pdo->lastInsertId();
+            }
 
-    if (!$user) {
-        /* 2. S'il n'existe pas, on le crée (mot de passe vide par défaut) */
-        $stmt = $pdo->prepare("INSERT INTO users(username, password) VALUES(?, '')");
-        $stmt->execute([$username]);
-        $user_id = $pdo->lastInsertId();
-    } else {
-        $user_id = $user['id'];
+            // 3. Insérer le message lié à l'ID trouvé ou créé
+            $stmt = $pdo->prepare("INSERT INTO messages (user_id, contenu, date_post) VALUES (?, ?, NOW())");
+            $stmt->execute([$user_id, $contenu]);
+
+            header('Location: forum.php');
+            exit();
+        } catch (PDOException $e) {
+            die("Erreur base de données : " . $e->getMessage());
+        }
     }
-
-    /* 3. Insérer le message lié à cet utilisateur */
-    $stmt = $pdo->prepare("INSERT INTO messages(user_id, contenu, date_post) VALUES(?, ?, NOW())");
-    $stmt->execute([$user_id, $contenu]);
-
-    /* 4. Retour au forum */
-    header("Location: forum.php");
-    exit;
-
-} catch (Exception $e) {
-    die("Erreur base de données : " . $e->getMessage());
 }
+header('Location: forum.php');
