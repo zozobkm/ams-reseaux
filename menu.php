@@ -7,35 +7,35 @@
     <ul class="sidebar-menu">
         <li>
             <a href="/ams-reseaux/dahboard/index.php" class="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>">
-                <span>🏠</span> Dashboard
+                Dashboard
             </a>
         </li>
         <li class="menu-label">Services Réseaux</li>
         <li>
-            <a href="/ams-reseaux/services/dhcp.php"><span>📡</span> Service DHCP</a>
+            <a href="/ams-reseaux/services/dhcp.php">Service DHCP</a>
         </li>
         <li>
-            <a href="/ams-reseaux/services/dns.php"><span>📖</span> Service DNS</a>
+            <a href="/ams-reseaux/services/dns.php">Service DNS</a>
         </li>
         <li>
-            <a href="/ams-reseaux/services/nat.php"><span>🛡️</span> NAT / Internet</a>
+            <a href="/ams-reseaux/services/nat.php">NAT / Internet</a>
         </li>
         <li class="menu-label">Applications</li>
         <li>
-            <a href="/ams-reseaux/services/ftp.php"><span>🚀</span> Débit FTP</a>
+            <a href="/ams-reseaux/services/ftp.php">Débit FTP</a>
         </li>
         <li>
-            <a href="/ams-reseaux/services/mail.php"><span>📧</span> Messagerie</a>
+            <a href="/ams-reseaux/services/mail.php">Messagerie</a>
         </li>
         <li>
-            <a href="/ams-reseaux/services/forum.php"><span>💬</span> Forum Entraide</a>
+            <a href="/ams-reseaux/services/forum.php">Forum Entraide</a>
         </li>
         <li class="menu-divider"></li>
         <li>
-            <a href="/ams-reseaux/services/reglages.php"><span>⚙️</span> Réglages IP</a>
+            <a href="/ams-reseaux/services/reglages.php">Réglages IP</a>
         </li>
         <li>
-            <a href="/ams-reseaux/auth/logout.php" style="color: #ff7675;"><span>🚪</span> Déconnexion</a>
+            <a href="/ams-reseaux/auth/logout.php" style="color: #ff7675;">Déconnexion</a>
         </li>
     </ul>
     
