@@ -1,87 +1,54 @@
-/* Couleurs Sobres et Modernes */
-:root {
-    --sidebar-bg: #1e293b; /* Bleu nuit pro */
-    --link-color: #94a3b8;
-    --active-color: #38bdf8;
-    --admin-color: #f87171;
-}
-
+/* --- Structure Globale --- */
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
     margin: 0;
     display: flex;
-    background-color: #f8fafc;
-    min-height: 100vh;
 }
 
-/* La Sidebar */
-.sidebar {
-    width: 260px;
-    background-color: var(--sidebar-bg);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    height: 100vh;
-}
-
-.sidebar-header {
-    padding: 20px;
-    text-align: center;
-    border-bottom: 1px solid #334155;
-}
-
-.badge-mode {
-    background: #0369a1;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-}
-
-.nav-menu {
-    flex-grow: 1;
-    padding: 20px 0;
-}
-
-.nav-link {
-    display: block;
-    padding: 12px 25px;
-    color: var(--link-color);
-    text-decoration: none;
-    transition: 0.2s;
-}
-
-.nav-link:hover {
-    background: #334155;
-    color: white;
-}
-
-.admin-link { color: var(--admin-color); }
-
-.nav-divider {
-    height: 1px;
-    background: #334155;
-    margin: 15px 25px;
-}
-
-.sidebar-footer {
-    padding: 20px;
-    border-top: 1px solid #334155;
-}
-
-.logout-btn {
-    display: block;
-    text-align: center;
-    background: #ef4444;
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-    border-radius: 6px;
-}
-
-/* IMPORTANT : Décaler le contenu des autres pages */
-.container, .main-content {
-    margin-left: 260px; /* Largeur de la sidebar */
+.main-content {
+    margin-left: 260px; /* Espace pour la sidebar bleue */
     padding: 40px;
     width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- Cartes (Cards) --- */
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+/* --- Titres et Badges --- */
+.header-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.status-badge {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: white;
+    background: #27ae60; /* Vert par défaut */
+}
+
+/* --- Boutons --- */
+.btn-ceribox {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
 }
