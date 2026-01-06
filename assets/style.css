@@ -1,54 +1,49 @@
-/* --- Structure Globale --- */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7f6;
-    margin: 0;
-    display: flex;
-}
-
-.main-content {
-    margin-left: 260px; /* Espace pour la sidebar bleue */
-    padding: 40px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* --- Cartes (Cards) --- */
-.card {
-    background: white;
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-}
-
-/* --- Titres et Badges --- */
-.header-page {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.status-badge {
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: bold;
+/* Barre latérale fixe à gauche */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #2c3e50; /* Bleu foncé pro */
     color: white;
-    background: #27ae60; /* Vert par défaut */
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px 0;
 }
 
-/* --- Boutons --- */
-.btn-ceribox {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
+.sidebar-brand {
+    padding: 0 25px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 20px 0;
+}
+
+.sidebar-menu li a {
+    display: block;
+    padding: 12px 25px;
+    color: #bdc3c7;
     text-decoration: none;
-    display: inline-block;
+    transition: 0.3s;
+}
+
+.sidebar-menu li a:hover, .sidebar-menu li a.active {
+    background: #34495e;
+    color: white;
+    border-left: 4px solid #3498db;
+}
+
+.menu-label {
+    padding: 15px 25px 5px;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    color: #7f8c8d;
+}
+
+/* IMPORTANT : Décale le contenu principal pour ne pas être sous le menu */
+.main-content {
+    margin-left: 260px;
+    padding: 40px;
+    width: calc(100% - 260px);
 }
