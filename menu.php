@@ -1,46 +1,45 @@
-<?php
-// Sécurité pour la session
-if(session_status() === PHP_SESSION_NONE){ session_start(); }
-
-// On récupère le mode pour l'affichage visuel
-$current_mode = $_SESSION["mode"] ?? "normal";
-$role = $_SESSION["role"] ?? "user";
-?>
 <div class="sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-brand">
         <h2>CeriBOX</h2>
-        <span class="badge-mode"><?= htmlspecialchars(strtoupper($current_mode)) ?></span>
+        <span class="status-badge-mini"><?= htmlspecialchars($_SESSION["mode"] ?? 'NORMAL') ?></span>
     </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/ams-reseaux/dahboard/index.php" class="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>">
+                <span>🏠</span> Dashboard
+            </a>
+        </li>
+        <li class="menu-label">Services Réseaux</li>
+        <li>
+            <a href="/ams-reseaux/services/dhcp.php"><span>📡</span> Service DHCP</a>
+        </li>
+        <li>
+            <a href="/ams-reseaux/services/dns.php"><span>📖</span> Service DNS</a>
+        </li>
+        <li>
+            <a href="/ams-reseaux/services/nat.php"><span>🛡️</span> NAT / Internet</a>
+        </li>
+        <li class="menu-label">Applications</li>
+        <li>
+            <a href="/ams-reseaux/services/ftp.php"><span>🚀</span> Débit FTP</a>
+        </li>
+        <li>
+            <a href="/ams-reseaux/services/mail.php"><span>📧</span> Messagerie</a>
+        </li>
+        <li>
+            <a href="/ams-reseaux/services/forum.php"><span>💬</span> Forum Entraide</a>
+        </li>
+        <li class="menu-divider"></li>
+        <li>
+            <a href="/ams-reseaux/services/reglages.php"><span>⚙️</span> Réglages IP</a>
+        </li>
+        <li>
+            <a href="/ams-reseaux/auth/logout.php" style="color: #ff7675;"><span>🚪</span> Déconnexion</a>
+        </li>
+    </ul>
     
-    <nav class="nav-menu">
-        <a href="/ams-reseaux/dahboard/index.php" class="nav-link">🏠 Dashboard</a>
-        
-        <div class="nav-divider"></div>
-        
-        <a href="/ams-reseaux/services/dhcp.php" class="nav-link">📡 Service DHCP</a>
-        <a href="/ams-reseaux/services/dns.php" class="nav-link">📖 Service DNS</a>
-        <a href="/ams-reseaux/services/nat.php" class="nav-link">🛡️ NAT / Internet</a>
-        
-        <div class="nav-divider"></div>
-
-        <a href="/ams-reseaux/services/ftp.php" class="nav-link">🚀 Débit FTP</a>
-        <a href="/ams-reseaux/services/mail.php" class="nav-link">📧 Messagerie</a>
-        <a href="/ams-reseaux/services/forum.php" class="nav-link">💬 Forum Entraide</a>
-
-        <div class="nav-divider"></div>
-
-        <a href="/ams-reseaux/services/box_settings.php" class="nav-link">⚙️ Réglages IP</a>
-        
-        <?php if($role === "admin"): ?>
-            <a href="/ams-reseaux/admin/users.php" class="nav-link admin-link">👮 Gestion Users</a>
-        <?php endif; ?>
-    </nav>
-
     <div class="sidebar-footer">
-        <div class="user-info">
-            <small>Connecté :</small><br>
-            <strong><?= htmlspecialchars($_SESSION["email"] ?? "Invité") ?></strong>
-        </div>
-        <a class="logout-btn" href="/ams-reseaux/auth/logout.php">Déconnexion</a>
+        Connecté : <strong><?= htmlspecialchars($_SESSION["email"] ?? 'Invité') ?></strong>
     </div>
 </div>
