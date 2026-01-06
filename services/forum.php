@@ -1,30 +1,20 @@
 <?php
-// 1. ACTIVER L'AFFICHAGE DES ERREURS (Pour ne plus avoir de page blanche)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
-
-// 2. VERIFIER LA CONNEXION (Assure-toi que db.php est bien dans le même dossier)
 require_once 'db.php'; 
 
-/* ===== MODE ADMIN ===== */
-$ADMIN_KEY = "admin123";
-if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
-    $_SESSION['admin'] = true;
-}
-
-/* ===== RÉCUPÉRATION DES MESSAGES (Correction : box_users) ===== */
+/* ===== RÉCUPÉRATION DES MESSAGES ===== */
 try {
+    // On récupère le contenu de ta table messages
+    // en le liant à la table box_users pour avoir le nom
     $sql = "SELECT messages.id, messages.contenu, messages.date_post, box_users.username 
             FROM messages 
             JOIN box_users ON messages.user_id = box_users.id 
             ORDER BY messages.date_post DESC";
     $stmt = $pdo->query($sql);
     $messages = $stmt->fetchAll();
-} catch (Exception $e) {
-    die("Erreur SQL : " . $e->getMessage());
+} catch (PDOException $e) {
+    // Si l'erreur "Unknown column username" revient, changez le nom de la colonne ci-dessous
+    die("Erreur technique : La colonne 'username' n'existe pas dans la table 'box_users'. Vérifiez son nom avec 'DESC box_users;'.");
 }
 ?>
 <!DOCTYPE html>
@@ -35,48 +25,33 @@ try {
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-    <?php 
-    if (file_exists(__DIR__ . '/../menu.php')) {
-        include __DIR__ . '/../menu.php'; 
-    } else {
-        echo "<p style='color:red;'>Erreur : menu.php non trouvé à la racine.</p>";
-    }
-    ?>
+    <?php if (file_exists(__DIR__ . '/../menu.php')) include __DIR__ . '/../menu.php'; ?>
 
-    <div class="main-content" style="margin-left: 260px; padding: 20px;">
-        <h1>Forum d'entraide</h1>
-
-        <div class="card" style="background:white; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
-            <?php if (!isset($_SESSION['admin'])): ?>
-                <form method="post">
-                    <input type="password" name="admin_key" placeholder="Clé admin">
-                    <button type="submit">Mode Expert</button>
-                </form>
-            <?php else: ?>
-                <span style="color:orange;">● Mode Expert Activé</span>
-            <?php endif; ?>
+    <div class="main-content" style="margin-left: 260px; padding: 30px;">
+        <div class="header">
+            <h1>Espace d'échange communautaire</h1>
+            <span class="mode-badge" style="background:#e67e22; color:white; padding:5px 15px; border-radius:20px;">Mode Expert</span>
         </div>
 
-        <div class="card" style="background:white; padding:20px; border-radius:8px; border:1px solid #ddd; margin-bottom:20px;">
-            <h3>Nouveau message</h3>
+        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px;">
+            <h3>Poser une question</h3>
             <form method="post" action="post.php">
-                <input type="text" name="username" placeholder="Pseudo" required style="width:100%; margin-bottom:10px; padding:8px;">
-                <textarea name="contenu" placeholder="Votre message..." required style="width:100%; height:80px; padding:8px;"></textarea>
+                <input type="text" name="username" placeholder="Votre Pseudo" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd;">
+                <textarea name="contenu" placeholder="Description de votre problème..." required style="width:100%; height:80px; padding:10px; margin-bottom:10px; border:1px solid #ddd;"></textarea>
                 <button type="submit" style="background:#3498db; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Envoyer</button>
             </form>
         </div>
 
-        <div class="card" style="background:white; padding:20px; border-radius:8px; border:1px solid #ddd;">
-            <?php if (empty($messages)): ?>
-                <p>Aucun message.</p>
-            <?php else: ?>
-                <?php foreach ($messages as $msg): ?>
-                    <div style="border-left: 4px solid #3498db; padding-left: 15px; margin-bottom:15px;">
+        <div class="card" style="background:white; padding:20px; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3>Discussions récentes</h3>
+            <?php foreach ($messages as $msg): ?>
+                <div class="message" style="border-left: 4px solid #3498db; padding-left:15px; margin-bottom:20px; border-bottom: 1px solid #eee; padding-bottom:10px;">
+                    <div style="font-size: 0.9em; color:#7f8c8d;">
                         <strong><?= htmlspecialchars($msg['username']) ?></strong> <small>(<?= $msg['date_post'] ?>)</small>
-                        <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                    <p style="margin-top:5px;"><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </body>
