@@ -40,7 +40,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion - ILLIPBOX</title>
+    <title>Connexion - CeriBOX</title>
     <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
     <style>
         /* Style spécifique pour centrer la carte de login car il n'y a pas de sidebar ici */
