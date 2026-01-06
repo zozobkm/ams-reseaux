@@ -1,5 +1,12 @@
 <?php
+// 1. ACTIVER L'AFFICHAGE DES ERREURS (Pour ne plus avoir de page blanche)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
+
+// 2. VERIFIER LA CONNEXION (Assure-toi que db.php est bien dans le même dossier)
 require_once 'db.php'; 
 
 /* ===== MODE ADMIN ===== */
@@ -9,12 +16,16 @@ if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
 }
 
 /* ===== RÉCUPÉRATION DES MESSAGES (Correction : box_users) ===== */
-$sql = "SELECT messages.id, messages.contenu, messages.date_post, box_users.username 
-        FROM messages 
-        JOIN box_users ON messages.user_id = box_users.id 
-        ORDER BY messages.date_post DESC";
-$stmt = $pdo->query($sql);
-$messages = $stmt->fetchAll();
+try {
+    $sql = "SELECT messages.id, messages.contenu, messages.date_post, box_users.username 
+            FROM messages 
+            JOIN box_users ON messages.user_id = box_users.id 
+            ORDER BY messages.date_post DESC";
+    $stmt = $pdo->query($sql);
+    $messages = $stmt->fetchAll();
+} catch (Exception $e) {
+    die("Erreur SQL : " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -24,51 +35,48 @@ $messages = $stmt->fetchAll();
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-    <?php include __DIR__ . '/../templates/menu.php'; ?>
+    <?php 
+    if (file_exists(__DIR__ . '/../menu.php')) {
+        include __DIR__ . '/../menu.php'; 
+    } else {
+        echo "<p style='color:red;'>Erreur : menu.php non trouvé à la racine.</p>";
+    }
+    ?>
 
-    <div class="main-content">
-        <div class="header" style="display: flex; justify-content: space-between; padding: 20px;">
-            <h1>Forum de discussion</h1>
-            <?php if (isset($_SESSION['admin'])): ?>
-                <span class="mode-badge" style="background:#e67e22; color:white; padding:5px 15px; border-radius:20px;">Mode Expert Activé</span>
-            <?php endif; ?>
-        </div>
+    <div class="main-content" style="margin-left: 260px; padding: 20px;">
+        <h1>Forum d'entraide</h1>
 
-        <div class="forum-card" style="background:white; padding:20px; margin:20px; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div class="card" style="background:white; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
             <?php if (!isset($_SESSION['admin'])): ?>
                 <form method="post">
                     <input type="password" name="admin_key" placeholder="Clé admin">
-                    <button type="submit">Activer mode admin</button>
+                    <button type="submit">Mode Expert</button>
                 </form>
             <?php else: ?>
-                <p>Mode administrateur actif. <a href="logout_admin.php" style="color:red;">Déconnexion</a></p>
+                <span style="color:orange;">● Mode Expert Activé</span>
             <?php endif; ?>
         </div>
 
-        <div class="forum-card" style="background:white; padding:20px; margin:20px; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h3>Poster un message</h3>
+        <div class="card" style="background:white; padding:20px; border-radius:8px; border:1px solid #ddd; margin-bottom:20px;">
+            <h3>Nouveau message</h3>
             <form method="post" action="post.php">
-                <input type="text" name="username" placeholder="Votre pseudo" required style="width:100%; padding:10px; margin-bottom:10px;">
-                <textarea name="contenu" placeholder="Votre message" required style="width:100%; height:80px;"></textarea>
+                <input type="text" name="username" placeholder="Pseudo" required style="width:100%; margin-bottom:10px; padding:8px;">
+                <textarea name="contenu" placeholder="Votre message..." required style="width:100%; height:80px; padding:8px;"></textarea>
                 <button type="submit" style="background:#3498db; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Envoyer</button>
             </form>
         </div>
 
-        <div class="forum-card" style="background:white; padding:20px; margin:20px; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h3>Discussions</h3>
-            <?php foreach ($messages as $msg): ?>
-                <div class="message" style="border-left: 4px solid #3498db; padding-left:15px; margin-bottom:20px;">
-                    <strong><?= htmlspecialchars($msg['username']) ?></strong> 
-                    <small style="color:gray;">(<?= $msg['date_post'] ?>)</small>
-                    <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
-                    <?php if (isset($_SESSION['admin'])): ?>
-                        <form method="post" action="delete.php">
-                            <input type="hidden" name="id" value="<?= $msg['id'] ?>">
-                            <button type="submit" style="color:red; background:none; border:none; cursor:pointer;">[Supprimer]</button>
-                        </form>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
+        <div class="card" style="background:white; padding:20px; border-radius:8px; border:1px solid #ddd;">
+            <?php if (empty($messages)): ?>
+                <p>Aucun message.</p>
+            <?php else: ?>
+                <?php foreach ($messages as $msg): ?>
+                    <div style="border-left: 4px solid #3498db; padding-left: 15px; margin-bottom:15px;">
+                        <strong><?= htmlspecialchars($msg['username']) ?></strong> <small>(<?= $msg['date_post'] ?>)</small>
+                        <p><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </body>
