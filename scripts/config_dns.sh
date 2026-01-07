@@ -1,31 +1,30 @@
 #!/bin/bash
-# Usage: sudo ./config_dns.sh IP_DU_SLAVE
+# Usage: sudo ./config_dns_slave.sh IP_DU_SLAVE
 
 SLAVE_IP=$1
 ZONEFILE="/etc/bind/db.ceri.com"
 CONFFILE="/etc/bind/named.conf.local"
-SLAVE_NAME="ns2" # Nom du serveur esclave
 
-if [ -z "$SLAVE_IP" ]; then
-    echo "Erreur : spécifiez l'adresse IP du serveur Slave."
+# 1. Vérifier si l'IP est valide (évite le bug "lui")
+if [[ ! $SLAVE_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Erreur : $SLAVE_IP n'est pas une adresse IP valide."
     exit 1
 fi
 
-# 1. Ajout des enregistrements NS et A dans le fichier de zone
-# On ajoute le serveur de nom (NS) et son adresse (A)
-sudo bash -c "echo '@         IN      NS      $SLAVE_NAME.ceri.com.' >> $ZONEFILE"
-sudo bash -c "echo '$SLAVE_NAME       IN      A       $SLAVE_IP' >> $ZONEFILE"
+# 2. Ajouter le Slave comme serveur de noms officiel dans la zone
+# On ajoute une ligne NS et une ligne A pour le nom ns2
+sudo bash -c "echo '@    IN    NS    ns2.ceri.com.' >> $ZONEFILE"
+sudo bash -c "echo 'ns2  IN    A     $SLAVE_IP' >> $ZONEFILE"
 
-# 2. Mise à jour du numéro de série (Serial)
-# Obligatoire pour que le Slave sache qu'il doit se mettre à jour
-# On cherche un nombre (le serial) et on le remplace par le timestamp actuel
+# 3. Mettre à jour le Serial pour forcer le transfert
 NEW_SERIAL=$(date +%s)
-sudo sed -i "s/[0-9]\{1,10\}/$NEW_SERIAL/1" "$ZONEFILE"
+sudo sed -i "s/[0-9]\{10\}/$NEW_SERIAL/" "$ZONEFILE"
 
-# 3. Mise à jour de named.conf.local pour autoriser le transfert
-# On remplace 'allow-update { none; };' par 'allow-transfer { IP_SLAVE; };'
-sudo sed -i "s/allow-update { none; };/allow-transfer { $SLAVE_IP; };/" "$CONFFILE"
+# 4. Autoriser le transfert vers cette IP spécifique dans la config
+# On remplace l'ancienne ligne par la nouvelle avec la vraie IP
+sudo sed -i "s/allow-transfer { .* };/allow-transfer { $SLAVE_IP; };/" "$CONFFILE"
+# Si la ligne n'existait pas, on peut utiliser une approche plus brute pour l'insérer
+# mais le sed ci-dessus corrige ton erreur actuelle "lui".
 
-# 4. Rechargement du service DNS
 sudo systemctl restart bind9
-echo "Succès : Le serveur Slave ($SLAVE_IP) a été déclaré et autorisé."
+echo "Succès : Le Slave $SLAVE_IP a été déclaré et autorisé sur le Master."
