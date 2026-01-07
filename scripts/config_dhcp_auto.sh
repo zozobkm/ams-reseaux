@@ -1,27 +1,28 @@
 #!/bin/bash
-RESEAU=$1
-MASQUE=$2
-DEBUT=$3
-FIN=$4
-PASSERELLE=$5
 
-echo "Configuration DHCP sur le réseau $RESEAU ..."
+# Récupération du nombre d'appareils envoyé par le PHP
+NB=$1
+DEBUT_IP=10
+# Calcul de la fin de plage (ex: si 10 appareils, finit à .19)
+FIN_IP=$((DEBUT_IP + NB - 1))
+
+# Sécurité pour ne pas dépasser la limite du réseau
+if [ $FIN_IP -gt 254 ]; then FIN_IP=254; fi
+
+echo "Configuration Auto pour $NB appareils..."
 
 sudo bash -c "cat > /etc/dhcp/dhcpd.conf" <<EOF
 default-lease-time 600;
 max-lease-time 7200;
 authoritative;
 
-subnet $RESEAU netmask $MASQUE {
-  range $DEBUT $FIN;
-  option routers $PASSERELLE;
-  option domain-name-servers $PASSERELLE; # Les clients interrogent ta CeriBox
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  range 192.168.1.$DEBUT_IP 192.168.1.$FIN_IP;
+  option routers 192.168.1.1;
+  option domain-name-servers 192.168.1.1;
   option domain-name "ceri.com";
 }
 EOF
 
-# On cible eth0 qui est ton interface LAN
-sudo sed -i 's/INTERFACESv4=.*/INTERFACESv4="eth0"/' /etc/default/isc-dhcp-server
-
 sudo systemctl restart isc-dhcp-server
-echo "DHCP configuré sur eth0 pour le domaine ceri.com !"
+echo "DHCP Auto configuré : 192.168.1.$DEBUT_IP à 192.168.1.$FIN_IP"
