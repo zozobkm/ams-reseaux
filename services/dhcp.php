@@ -9,16 +9,17 @@ $is_avance = ($mode === "avance");
 // --- Logique d'exécution des scripts ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['auto'])) {
-        // Mode Normal : On configure selon le nombre d'appareils
         $nb = intval($_POST['nb']);
-        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh auto $nb";
+        // On n'envoie que le nombre d'appareils
+        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh $nb";
         $resultat = shell_exec($cmd . " 2>&1");
     } 
     elseif (isset($_POST['manuel']) && $is_avance) {
-        // Mode Avancé : On récupère les plages IP
+        // On récupère les IPs et on les nettoie
         $debut = escapeshellarg($_POST['debut']);
         $fin = escapeshellarg($_POST['fin']);
-        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh manuel $debut $fin";
+        // IMPORTANT : On n'envoie plus le mot "manuel" ici
+        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh $debut $fin";
         $resultat = shell_exec($cmd . " 2>&1");
     }
 }
