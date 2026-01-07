@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['auto'])) {
         // Mode Normal : On configure selon le nombre d'appareils
         $nb = intval($_POST['nb']);
-        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp.sh auto $nb";
+        $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp.auto.sh auto $nb";
         $resultat = shell_exec($cmd . " 2>&1");
     } 
     elseif (isset($_POST['manuel']) && $is_avance) {
