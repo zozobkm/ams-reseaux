@@ -1,30 +1,14 @@
 #!/bin/bash
 
-# Récupération du nombre d'appareils
-NB=$1
+# En mode manuel, on reçoit TOUT le texte de la configuration en un seul bloc
+NOUVELLE_CONFIG=$1
 
-# Calcul de la plage : on commence à .10 sur le réseau 10.x
-DEBUT="192.168.10.10"
-FIN_OCTET=$((10 + NB - 1)) # -1 pour avoir exactement le nombre demandé
-FIN="192.168.10.$FIN_OCTET"
+echo "Application de la configuration manuelle..."
 
-# Paramètres fixes alignés sur eth1 (192.168.10.1)
-RESEAU="192.168.10.0"
-MASQUE="255.255.255.0"
-PASSERELLE="192.168.10.1"
+# On utilise sudo pour écraser le fichier avec le texte reçu
+sudo bash -c "echo -e '$NOUVELLE_CONFIG' > /etc/dhcp/dhcpd.conf"
 
-sudo bash -c "cat > /etc/dhcp/dhcpd.conf" <<EOF
-default-lease-time 600;
-max-lease-time 7200;
-authoritative;
-
-subnet $RESEAU netmask $MASQUE {
-  range $DEBUT $FIN;
-  option routers $PASSERELLE;
-  option domain-name-servers $PASSERELLE;
-  option domain-name "ceri.com";
-}
-EOF
-
+# Redémarrage du service pour appliquer les changements
 sudo systemctl restart isc-dhcp-server
-echo "Succès : Configuration automatique pour $NB appareils ($DEBUT à $FIN)."
+
+echo "Le fichier /etc/dhcp/dhcpd.conf a été mis à jour manuellement."
