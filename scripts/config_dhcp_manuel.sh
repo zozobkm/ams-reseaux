@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# En mode manuel, on reçoit TOUT le texte de la configuration en un seul bloc
+# En mode manuel, $1 contient TOUT le texte tapé dans la zone de texte
 NOUVELLE_CONFIG=$1
 
-echo "Application de la configuration manuelle..."
-
-# On utilise sudo pour écraser le fichier avec le texte reçu
+# On écrase le fichier avec le texte reçu (on utilise echo -e pour les retours à la ligne)
 sudo bash -c "echo -e '$NOUVELLE_CONFIG' > /etc/dhcp/dhcpd.conf"
 
-# Redémarrage du service pour appliquer les changements
+# On redémarre le service pour appliquer les changements
 sudo systemctl restart isc-dhcp-server
 
-echo "Le fichier /etc/dhcp/dhcpd.conf a été mis à jour manuellement."
+echo "Succès : Fichier dhcpd.conf mis à jour manuellement."
