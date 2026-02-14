@@ -1,12 +1,26 @@
 #!/bin/bash
 
-# En mode manuel, $1 contient TOUT le texte tapé dans la zone de texte
-NOUVELLE_CONFIG=$1
+# Le PHP envoie deux arguments : $1 (IP début) et $2 (IP fin)
+DEBUT=$1
+FIN=$2
 
-# On écrase le fichier avec le texte reçu (on utilise echo -e pour les retours à la ligne)
-sudo bash -c "echo -e '$NOUVELLE_CONFIG' > /etc/dhcp/dhcpd.conf"
+# Paramètres fixes alignés sur ta Box (192.168.10.1)
+RESEAU="192.168.10.0"
+MASQUE="255.255.255.0"
+PASSERELLE="192.168.10.1"
 
-# On redémarre le service pour appliquer les changements
+sudo bash -c "cat > /etc/dhcp/dhcpd.conf" <<EOF
+default-lease-time 600;
+max-lease-time 7200;
+authoritative;
+
+subnet $RESEAU netmask $MASQUE {
+  range $DEBUT $FIN;
+  option routers $PASSERELLE;
+  option domain-name-servers $PASSERELLE;
+  option domain-name "ceri.com";
+}
+EOF
+
 sudo systemctl restart isc-dhcp-server
-
-echo "Succès : Fichier dhcpd.conf mis à jour manuellement."
+echo "Succès Manuel : Plage $DEBUT à $FIN appliquée."
