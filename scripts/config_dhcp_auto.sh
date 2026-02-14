@@ -16,10 +16,10 @@ default-lease-time 600;
 max-lease-time 7200;
 authoritative;
 
-subnet 192.168.1.0 netmask 255.255.255.0 {
-  range 192.168.1.$DEBUT_IP 192.168.1.$FIN_IP;
-  option routers 192.168.1.1;
-  option domain-name-servers 192.168.1.1;
+subnet 192.168.10.0 netmask 255.255.255.0 {
+  range 192.168.10.$DEBUT_IP 192.168.10.$FIN_IP;
+  option routers 192.168.10.1;
+  option domain-name-servers 192.168.10.1;
   option domain-name "ceri.com";
 }
 EOF
