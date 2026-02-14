@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Correction des interfaces selon tes captures
-WAN="eth1"
-LAN="eth0"
+WAN="eth0"  # Interface vers Internet
+LAN="eth1"  # Interface vers Alice (192.168.10.1)
 
 echo "Activation du NAT sur $WAN pour le reseau $LAN..."
 
