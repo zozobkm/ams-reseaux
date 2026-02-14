@@ -11,14 +11,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['auto'])) {
         $nb = filter_var($_POST['nb'], FILTER_VALIDATE_INT);
         if ($nb !== false && $nb >= 1 && $nb <= 250) {
-            $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh $nb";
+            // Utilisation du chemin absolu et du réseau 10.x via le script auto
+            $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_auto.sh $nb";
             $resultat = shell_exec($cmd . " 2>&1");
         } else {
             $resultat = "Erreur : Le nombre d'appareils doit être un entier entre 1 et 250.";
         }
     } 
     elseif (isset($_POST['manuel']) && $is_avance) {
-        // Validation des octets (uniquement le dernier chiffre de l'IP)
         $start_octet = filter_var($_POST['debut_octet'], FILTER_VALIDATE_INT);
         $end_octet = filter_var($_POST['fin_octet'], FILTER_VALIDATE_INT);
 
@@ -26,11 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $start_octet >= 2 && $end_octet <= 254 && 
             $start_octet < $end_octet) {
             
-            // Reconstruction de l'IP complète pour le script
-            $debut_ip = escapeshellarg("192.168.1." . $start_octet);
-            $fin_ip = escapeshellarg("192.168.1." . $end_octet);
+            // CORRECTION : Passage au réseau 192.168.10.x pour correspondre à eth1
+            $debut_ip = escapeshellarg("192.168.10." . $start_octet);
+            $fin_ip = escapeshellarg("192.168.10." . $end_octet);
 
-            $cmd = "sudo bash /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh $debut_ip $fin_ip";
+            // Appel du script manuel avec les deux IPs en arguments
+            $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dhcp_manuel.sh $debut_ip $fin_ip";
             $resultat = shell_exec($cmd . " 2>&1");
         } else {
             $resultat = "Erreur : Plage invalide. Utilisez des nombres entre 2 et 254 (le début doit être inférieur à la fin).";
@@ -83,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="card">
             <h3>📡 Attribution des adresses IP</h3>
-            <p>Le service DHCP attribue automatiquement une adresse IP à chaque appareil. Le préfixe réseau est fixé sur <strong>192.168.1.0/24</strong>.</p>
+            <p>Le service DHCP attribue automatiquement une adresse IP à chaque appareil. Le préfixe réseau est fixé sur <strong>192.168.10.0/24</strong>.</p>
         </div>
 
         <div class="card">
@@ -102,14 +103,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div style="margin-bottom: 15px;">
                         <label>Début de plage :</label>
                         <div class="ip-input-group">
-                            <span class="ip-prefix">192.168.1.</span>
+                            <span class="ip-prefix">192.168.10.</span>
                             <input type="number" name="debut_octet" class="ip-octet" min="2" max="253" value="10" required>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label>Fin de plage :</label>
                         <div class="ip-input-group">
-                            <span class="ip-prefix">192.168.1.</span>
+                            <span class="ip-prefix">192.168.10.</span>
                             <input type="number" name="fin_octet" class="ip-octet" min="3" max="254" value="50" required>
                         </div>
                     </div>
