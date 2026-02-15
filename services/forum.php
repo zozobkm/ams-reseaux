@@ -95,7 +95,7 @@ try {
                             <form method="post" action="delete.php" onsubmit="return confirm('Supprimer ce message ?');" style="margin-top: 10px;">
                                 <input type="hidden" name="id" value="<?= $msg['id'] ?>">
                                 <button type="submit" style="background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.8em; font-weight: bold;">
-                                    [🗑️ Supprimer]
+                                    [ Supprimer]
                                 </button>
                             </form>
                         <?php endif; ?>
