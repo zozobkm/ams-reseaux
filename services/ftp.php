@@ -35,7 +35,7 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
 
        
         <div class="card" style="border-left: 5px solid #e74c3c; background: #fff5f5;">
-            <h3>🛡️ Analyse de Sécurité (Tâche S6)</h3>
+            <h3>Analyse de Sécurité </h3>
             <?php
             if (file_exists($logFile)) {
                 $data = file($logFile);
@@ -68,7 +68,7 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
         </div>
 
         <div class="card">
-            <h3>🚀 Performance Réseau</h3>
+            <h3> Performance Réseau</h3>
             <form method="post">
                 <button type="submit" name="run_test" class="btn-blue">Lancer un test de débit</button>
             </form>
@@ -78,7 +78,7 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
         </div>
 
         <div class="card">
-            <h3>📊 Historique SQL (Base de données)</h3>
+            <h3>Historique SQL (Base de données)</h3>
             <table style="width:100%; border-collapse: collapse;">
                 <thead>
                     <tr style="text-align: left; border-bottom: 2px solid #eee;">
