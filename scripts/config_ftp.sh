@@ -35,6 +35,13 @@ fi
 DIFF=$(echo "$END - $START" | bc)
 VITESSE=$(echo "scale=2; 10 / $DIFF" | bc)
 
+# ---  Stockage dans un fichier ---
+TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+echo "$TIMESTAMP | $ACTION | $VITESSE" >> $LOG_FILE
+
 echo "---"
 echo "Resultat : Termine en $DIFF secondes."
 echo "Debit : $VITESSE Mo/s"
+
+
+
