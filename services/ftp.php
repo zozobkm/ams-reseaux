@@ -38,32 +38,35 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
         <h1>Surveillance Flux & Débit</h1>
 
        
-        <div class="card" style="border-left: 5px solid #e74c3c;">
-            <h3> Analyseur de Sécurité</h3>
-            <?php
-            if (file_exists($logFile)) {
-                $lines = file($logFile);
-                $total = 0; $count = 0; $lastVal = 0;
+       <div class="card" style="border-left: 5px solid #e74c3c;">
+    <h3>🛡️ Analyseur de Sécurité (Debug)</h3>
+    <?php
+    if (file_exists($logFile)) {
+        $lines = file($logFile);
+        $total = 0; $count = 0; $lastVal = 0;
 
-                foreach ($lines as $l) {
-                    $parts = explode(" | ", trim($l)); // Traitement de chaînes
-                    if (count($parts) == 3) {
-                        $val = (float)$parts[2];
-                        $total += $val; $count++;
-                        $lastVal = $val;
-                    }
-                }
-                $moyenne = $count > 0 ? $total / $count : 0;
-
-                // ALGORITHME : Détection si chute > 50% de la moyenne
-                if ($lastVal < ($moyenne * 0.5) && $count > 1) {
-                    echo "<div style='color:red;'><strong> ANOMALIE :</strong> Débit actuel ($lastVal Mo/s) très inférieur à la moyenne (".round($moyenne, 2)." Mo/s).</div>";
-                } else {
-                    echo "<div style='color:green;'><strong> NOMINAL :</strong> Flux réseau stable.</div>";
-                }
+        foreach ($lines as $l) {
+            $parts = explode(" | ", trim($l));
+            if (count($parts) == 3) {
+                $val = (float)$parts[2];
+                $total += $val; $count++;
+                $lastVal = $val;
             }
-            ?>
-        </div>
+        }
+        $moyenne = $count > 0 ? $total / $count : 0;
+        $seuil = $moyenne * 0.5;
+
+        // Affichage des valeurs pour comprendre le test
+        echo "<small>Moyenne : <b>$moyenne</b> | Dernier : <b>$lastVal</b> | Seuil d'alerte : <b>$seuil</b></small><br>";
+
+        if ($lastVal < $seuil && $count > 1) {
+            echo "<div style='color:red;'><strong>⚠️ ANOMALIE DÉTECTÉE !</strong></div>";
+        } else {
+            echo "<div style='color:green;'><strong>✅ NOMINAL</strong></div>";
+        }
+    }
+    ?>
+</div>
 
         <div class="card">
             <h3>Lancer une mesure réelle</h3>
