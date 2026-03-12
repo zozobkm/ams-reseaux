@@ -56,13 +56,11 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
         $moyenne = $count > 0 ? $total / $count : 0;
         $seuil = $moyenne * 0.5;
 
-        // Affichage des valeurs pour comprendre le test
-        echo "<small>Moyenne : <b>$moyenne</b> | Dernier : <b>$lastVal</b> | Seuil d'alerte : <b>$seuil</b></small><br>";
 
         if ($lastVal < $seuil && $count > 1) {
-            echo "<div style='color:red;'><strong>⚠️ ANOMALIE DÉTECTÉE !</strong></div>";
+            echo "<div style='color:red;'><strong> ANOMALIE DÉTECTÉE !</strong></div>";
         } else {
-            echo "<div style='color:green;'><strong>✅ NOMINAL</strong></div>";
+            echo "<div style='color:green;'><strong> NOMINAL</strong></div>";
         }
     }
     ?>
