@@ -28,7 +28,7 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>CeriBox - Cyber-Sentinel S6</title>
+    <title>CeriBox - Cyber-Sentinel </title>
     <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -39,7 +39,7 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
 
        
         <div class="card" style="border-left: 5px solid #e74c3c;">
-            <h3>🛡️ Analyseur de Sécurité</h3>
+            <h3> Analyseur de Sécurité</h3>
             <?php
             if (file_exists($logFile)) {
                 $lines = file($logFile);
@@ -57,9 +57,9 @@ $historique = $pdo->query("SELECT * FROM tests_debit ORDER BY date_tes DESC LIMI
 
                 // ALGORITHME : Détection si chute > 50% de la moyenne
                 if ($lastVal < ($moyenne * 0.5) && $count > 1) {
-                    echo "<div style='color:red;'><strong>⚠️ ANOMALIE :</strong> Débit actuel ($lastVal Mo/s) très inférieur à la moyenne (".round($moyenne, 2)." Mo/s).</div>";
+                    echo "<div style='color:red;'><strong> ANOMALIE :</strong> Débit actuel ($lastVal Mo/s) très inférieur à la moyenne (".round($moyenne, 2)." Mo/s).</div>";
                 } else {
-                    echo "<div style='color:green;'><strong>✅ NOMINAL :</strong> Flux réseau stable.</div>";
+                    echo "<div style='color:green;'><strong> NOMINAL :</strong> Flux réseau stable.</div>";
                 }
             }
             ?>
