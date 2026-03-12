@@ -2,11 +2,13 @@
 # Usage: ./config_ftp.sh [upload|download]
 
 ACTION=$1
-# Utilisation du nom DNS local pour valider le fonctionnement de Bind9
+# --- CONFIGURATION (À VÉRIFIER) ---
 SERVEUR_FTP="ftp.ceri.com" 
 USER="ftpuser"
 PASS="ftp123"
 FICHIER_TEST="/tmp/test_debit.dat"
+# AJOUT INDISPENSABLE POUR LA TÂCHE S6 :
+LOG_FILE="/home/stud/ftp_audit.log" 
 
 # 1. Verification et creation du fichier de test de 10Mo
 if [ ! -f $FICHIER_TEST ]; then
@@ -23,25 +25,23 @@ if [ "$ACTION" == "upload" ]; then
 elif [ "$ACTION" == "download" ]; then
     echo "Test de reception (Download) depuis $SERVEUR_FTP en cours..."
     START=$(date +%s.%N)
-    # Telechargement vers /dev/null pour mesurer uniquement le flux reseau
-    curl -o /dev/null ftp://$SERVEUR_FTP/test_10M.dat --user $USER:$PASS
+    # On télécharge test_debit.dat (celui envoyé par l'upload)
+    curl -o /dev/null ftp://$SERVEUR_FTP/test_debit.dat --user $USER:$PASS
     END=$(date +%s.%N)
 else
     echo "Erreur : Usage : $0 [upload|download]"
     exit 1
 fi
 
-# 3. Calcul de la vitesse de transfert (necessite le paquet bc)
+# 3. Calcul de la vitesse de transfert
 DIFF=$(echo "$END - $START" | bc)
 VITESSE=$(echo "scale=2; 10 / $DIFF" | bc)
 
-# ---  Stockage dans un fichier ---
+# --- STOCKAGE DANS LE FICHIER (TÂCHE S6) ---
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-echo "$TIMESTAMP | $ACTION | $VITESSE" >> $LOG_FILE
+# Utilisation de guillemets pour éviter l'erreur "ambiguous redirect"
+echo "$TIMESTAMP | $ACTION | $VITESSE" >> "$LOG_FILE"
 
 echo "---"
 echo "Resultat : Termine en $DIFF secondes."
 echo "Debit : $VITESSE Mo/s"
-
-
-
