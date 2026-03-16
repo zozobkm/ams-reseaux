@@ -8,7 +8,7 @@ $hash = password_hash($nouveau_password, PASSWORD_BCRYPT);
 
 try {
     $stmt = $pdo->prepare("UPDATE box_users SET password_hash = ? WHERE email = ?");
-    $stmt->execute([$hash, 'user@box.local']);
+    $stmt->execute([$hash, 'admin@ceri.lan']);
     echo "✅ Succès ! Le mot de passe de user@box.local est maintenant : 123";
 } catch (PDOException $e) {
     echo "❌ Erreur : " . $e->getMessage();
