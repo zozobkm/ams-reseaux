@@ -1,86 +1,61 @@
-<?php
-session_start();
-if (!isset($_SESSION["user_id"])) {
-    header("Location: /ams-reseaux/auth/login.php");
-    exit;
-}
-
-$mode = $_SESSION["mode"] ?? "normal";
-$is_avance = ($mode === "avance");
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>CeriBox - Dashboard</title>
-    <link rel="stylesheet" href="/ams-reseaux/assets/style.css">
-</head>
-<body>
-
-<?php 
-// Inclusion du menu (il est à la racine du projet ams-reseaux)
-$menu_path = __DIR__ . '/../menu.php';
-if (file_exists($menu_path)) {
-    include $menu_path;
-}
-?>
-
 <div class="main-content">
-    <div class="header-page">
+    <div class="header-page" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h1>Tableau de bord</h1>
-            <p>Bienvenue, <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong> (<em><?= htmlspecialchars($_SESSION["role"]) ?></em>)</p>
+            <h1 style="margin-bottom: 5px;">Tableau de bord</h1>
+            <p style="color: var(--text-muted);">Bienvenue, administrateur de la Box.</p>
         </div>
         
         <form method="post" action="toggle_mode.php">
-            <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#e67e22' : '#3498db' ?>;">
-                Passer en mode <?= $is_avance ? "Normal" : "Avancé" ?>
+            <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>; border:none; padding: 10px 20px; border-radius: 8px; color: white; cursor: pointer;">
+                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> 
+                Mode <?= $is_avance ? "Normal" : "Avancé" ?>
             </button>
         </form>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+    <div class="dashboard-grid">
         
-        <a href="/ams-reseaux/services/forum.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>💬 Forum Entraide</h3>
-            <p>Posez vos questions ou aidez la communauté.</p>
-            <span class="badge" style="background: #27ae60;">Actif</span>
+        <a href="/ams-reseaux/services/forum.php" class="dashboard-card">
+            <i class="fas fa-comments card-icon" style="color: #10b981;"></i>
+            <h3>Forum Communautaire</h3>
+            <p>Accédez aux discussions et entraidez les clients du FAI.</p>
         </a>
 
-        <a href="/ams-reseaux/services/dhcp.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>📡 Service DHCP</h3>
-            <p>Gestion de l'attribution des adresses IP locales.</p>
-            <span class="badge">Configuration</span>
+        <a href="/ams-reseaux/services/dhcp.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
+            <i class="fas fa-network-wired card-icon"></i>
+            <h3>Service DHCP</h3>
+            <p>Gestion de l'attribution dynamique des adresses IP locales.</p>
         </a>
 
-        <a href="/ams-reseaux/services/dns.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>📖 Service DNS</h3>
-            <p>Gestion des noms de domaine et de l'annuaire.</p>
+        <a href="/ams-reseaux/services/dns.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
+            <i class="fas fa-database card-icon"></i>
+            <h3>Service DNS</h3>
+            <p>Résolution de noms et annuaire local du domaine box.local.</p>
         </a>
 
-        <a href="/ams-reseaux/services/nat.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>🛡️ Sécurité & NAT</h3>
-            <p>Partage de connexion et redirection de ports.</p>
+        <a href="/ams-reseaux/services/mail.php" class="dashboard-card">
+            <i class="fas fa-envelope-open-text card-icon" style="color: #6366f1;"></i>
+            <h3>Messagerie Postfix</h3>
+            <p>Consultez et envoyez vos emails via le serveur local.</p>
         </a>
 
-        <a href="/ams-reseaux/services/ftp.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>📂 Débit FTP</h3>
-            <p>Mesurez la vitesse réelle de votre connexion.</p>
+        <a href="/ams-reseaux/services/ftp.php" class="dashboard-card">
+            <i class="fas fa-gauge-high card-icon" style="color: #ec4899;"></i>
+            <h3>Débit & Performance</h3>
+            <p>Tests de bande passante et transferts de fichiers FTP.</p>
         </a>
 
-        <a href="/ams-reseaux/services/mail.php" class="card" style="text-decoration: none; color: inherit;">
-            <h3>📧 Serveur Mail</h3>
-            <p>Accédez à votre messagerie locale Postfix.</p>
+        <a href="/ams-reseaux/services/nat.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
+            <i class="fas fa-shield-virus card-icon"></i>
+            <h3>Sécurité & NAT</h3>
+            <p>Configuration du pare-feu et redirection de ports (PAT).</p>
         </a>
     </div>
 
     <?php if ($is_avance): ?>
-    <div class="card" style="margin-top: 30px; border-left: 5px solid #e67e22;">
-        <h3>⚙️ Paramètres Avancés</h3>
-        <p>En mode avancé, vous avez accès à la modification directe des fichiers système.</p>
+    <div class="dashboard-card" style="margin-top: 30px; border: 1px dashed #f59e0b; background: #fffbeb;">
+        <h3 style="color: #b45309;"><i class="fas fa-triangle-exclamation"></i> Administration Système</h3>
+        <p>Le mode avancé est activé. Vous pouvez modifier les fichiers de configuration de la Box Ubuntu.</p>
     </div>
     <?php endif; ?>
 </div>
-
-</body>
-</html>
