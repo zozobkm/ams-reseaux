@@ -2,15 +2,35 @@
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php';
 
+// --- 1. ACTION : GÉNÉRATION DU FLUX (Si on l'appelle en téléchargement) ---
+if (isset($_GET['action']) && $_GET['action'] === 'generate') {
+    if (ob_get_level()) ob_end_clean();
+    header("Content-Type: application/octet-stream");
+    header("Content-Length: 10485760"); // 10 Mo
+    for ($i = 0; $i < 160; $i++) {
+        echo str_repeat("0", 65536); 
+        flush();
+    }
+    exit; // On arrête le script ici pour ne pas envoyer le HTML
+}
+
+// --- 2. ACTION : SAUVEGARDE SQL (Si on reçoit un POST) ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['debit'])) {
+    try {
+        // On utilise tes colonnes : temps_sec, taille_mo, debit_mbps
+        $stmt = $pdo->prepare("INSERT INTO tests_debit (temps_sec, taille_mo, debit_mbps) VALUES (?, ?, ?)");
+        $stmt->execute([$_POST['temps'], $_POST['taille'], $_POST['debit']]);
+        echo "OK";
+    } catch (PDOException $e) { echo "Erreur"; }
+    exit; 
+}
+
+// --- 3. AFFICHAGE DE LA PAGE ---
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
-// --- RÉCUPÉRATION DES DONNÉES ---
-// On trie par ID DESC pour avoir TOUJOURS les derniers tests en premier
-$sql = "SELECT id, date_tes, debit_mbps FROM tests_debit ORDER BY id DESC LIMIT 10";
-$history = $pdo->query($sql)->fetchAll();
-
-// Préparation Graphique (on remet dans l'ordre pour que la courbe aille de gauche à droite)
+// Récupération des 10 derniers tests (Tri par ID DESC pour avoir les nouveaux !)
+$history = $pdo->query("SELECT * FROM tests_debit ORDER BY id DESC LIMIT 10")->fetchAll();
 $chart_data = array_reverse($history);
 $labels = []; $values = [];
 foreach ($chart_data as $row) {
@@ -27,8 +47,8 @@ foreach ($chart_data as $row) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .speed-value { font-size: 3.5rem; font-weight: 800; color: #2563eb; }
-        .progress-container { width: 100%; background: #eee; height: 12px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        .speed-value { font-size: 3.5rem; font-weight: 800; color: #2563eb; margin: 10px 0; }
+        .progress-container { width: 100%; background: #edf2f7; height: 12px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
         #progress-bar { width: 0%; height: 100%; background: #2563eb; transition: width 0.1s linear; }
     </style>
 </head>
@@ -38,26 +58,24 @@ foreach ($chart_data as $row) {
     <div class="main-content">
         <h1>Surveillance Flux & Débit</h1>
 
-        <div class="card" style="text-align: center; padding: 30px;">
+        <div class="card" style="text-align: center; padding: 40px;">
             <div id="speed-display" class="speed-value">0.00 <span style="font-size: 1.2rem;">Mo/s</span></div>
             <p id="test-status">Prêt pour le test</p>
             <div class="progress-container"><div id="progress-bar"></div></div>
-            <button id="start-btn" onclick="runSpeedTest()" class="btn-blue">
-                <i class="fas fa-play"></i> LANCER LE TEST
-            </button>
+            <button id="start-btn" onclick="runSpeedTest()" class="btn-blue">LANCER LE TEST</button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px;">
             <div class="card">
-                <h3>📈 Performance réseau</h3>
+                <h3>📈 Graphique</h3>
                 <div style="height: 250px;"><canvas id="debitChart"></canvas></div>
             </div>
             <div class="card">
                 <h3>📂 Historique SQL</h3>
-                <table style="width: 100%; border-collapse: collapse;">
+                <table style="width: 100%; font-size: 0.9rem;">
                     <?php foreach ($history as $h): ?>
                     <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px 0;"><?= $h['date_tes'] ?></td>
+                        <td style="padding: 8px 0;"><?= $h['date_tes'] ?></td>
                         <td style="text-align: right; font-weight: bold;"><?= $h['debit_mbps'] ?> Mo/s</td>
                     </tr>
                     <?php endforeach; ?>
@@ -74,40 +92,37 @@ async function runSpeedTest() {
     const status = document.getElementById('test-status');
 
     btn.disabled = true;
-    status.innerText = "Téléchargement...";
+    status.innerText = "Téléchargement en cours...";
     
     const startTime = performance.now();
     try {
-        // On utilise le chemin direct pour la VM
-        const response = await fetch('generate_test_file.php?t=' + Date.now());
+        // On s'appelle soi-même pour télécharger le flux
+        const response = await fetch('ftp.php?action=generate&t=' + Date.now());
         const reader = response.body.getReader();
         let received = 0;
-        const total = 10 * 1024 * 1024;
 
         while(true) {
             const {done, value} = await reader.read();
             if (done) break;
             received += value.length;
-            bar.style.width = (received / total * 100) + "%";
+            bar.style.width = (received / 10485760 * 100) + "%";
         }
 
         const duration = (performance.now() - startTime) / 1000;
         const speed = (received / duration / 1024 / 1024).toFixed(2);
 
         display.innerHTML = `${speed} <span style="font-size: 1.2rem;">Mo/s</span>`;
-        status.innerText = "Sauvegarde...";
+        status.innerText = "Enregistrement...";
 
-        // Envoi des données
-        await fetch('save_debit.php', {
+        // On s'appelle soi-même en POST pour sauvegarder
+        await fetch('ftp.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: `debit=${speed}&temps=${duration.toFixed(2)}&taille=10`
         });
 
-        // RECHARGEMENT FORCÉ : On attend un peu et on recharge la page
-        setTimeout(() => { 
-            window.location.reload(); 
-        }, 800);
+        // Recharge la page pour voir le nouveau test direct !
+        setTimeout(() => { location.reload(); }, 800);
 
     } catch (e) { 
         status.innerText = "Erreur de connexion"; 
@@ -115,7 +130,6 @@ async function runSpeedTest() {
     }
 }
 
-// Graphique
 const ctx = document.getElementById('debitChart').getContext('2d');
 new Chart(ctx, {
     type: 'line',
