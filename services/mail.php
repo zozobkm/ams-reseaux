@@ -1,48 +1,24 @@
 <?php
-session_start();
 require_once __DIR__ . "/../auth/require_login.php";
-require_once 'db.php';
+require_once __DIR__ . "/../services/db.php";
 
-// --- INITIALISATION DES RÔLES ---
-$is_admin = isset($_SESSION['admin']) && $_SESSION['admin'] === true; // Patron (Gestion comptes/forum)
-$is_expert = (isset($_SESSION['mode']) && $_SESSION['mode'] === "avance"); // Client Avancé (Config réseau)
-$currentUserEmail = $_SESSION['email']; 
-$currentUsername = explode('@', $currentUserEmail)[0]; // On récupère 'user1' de 'user1@box.local'
+// On récupère le nom de l'utilisateur Linux (ex: alice depuis alice@box.local)
+$user_email = $_SESSION['email'];
+$user_linux = explode('@', $user_email)[0];
+$file_path = "/var/mail/" . $user_linux;
 
-// --- 1. LOGIQUE D'ENVOI (Pour TOUS les utilisateurs) ---
-if (isset($_POST['envoyer_mail'])) {
-    $dest = trim($_POST['destinataire']);
-    $sujet = htmlspecialchars($_POST['sujet']);
+$message_sent = "";
+
+// --- GESTION DE L'ENVOI (Tâche S5) ---
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send_mail'])) {
+    $to = escapeshellcmd($_POST['to']);
+    $subject = escapeshellcmd($_POST['subject']);
     $msg = $_POST['message'];
-    
-    // Traitement S6 : Censure de sécurité avant envoi
-    $mots_interdits = ["virus", "hack", "spam"];
-    $msg_filtre = str_ireplace($mots_interdits, "[CENSURÉ]", $msg);
-    
-    $headers = "From: $currentUserEmail\r\n" . "Reply-To: $currentUserEmail\r\n";
 
-    if (mail($dest, $sujet, $msg_filtre, $headers)) {
-        $feedback = "<div class='card' style='border-left: 5px solid #27ae60;'>✅ Message envoyé à $dest</div>";
-        // Audit S6 : Enregistrement de l'activité [cite: 17]
-        shell_exec("echo \"$(date) | MAIL_OUT | From: $currentUsername To: $dest\" >> /home/stud/ftp_audit.log");
-    }
-}
-
-// --- 2. LOGIQUE DE RÉCEPTION (Lecture de la session actuelle) ---
-$mailBoxFile = "/var/mail/" . $currentUsername;
-$boite_reception = [];
-if (file_exists($mailBoxFile)) {
-    $content = file_get_contents($mailBoxFile);
-    $boite_reception = explode("From ", $content);
-    array_shift($boite_reception); // On retire l'entête vide
-}
-
-// --- 3. LOGIQUE ADMIN : CRÉATION DE COMPTE (Patron uniquement) ---
-if (isset($_POST['creer_user']) && $is_admin) {
-    $nouveau = escapeshellarg(trim($_POST['nom_user']));
-    // Appel du script de configuration mail S5 
-    $res = shell_exec("sudo /var/www/html/ams-reseaux/scripts/config_mail.sh add $nouveau 2>&1");
-    $feedback = "<div class='card' style='border-left: 5px solid #e67e22;'>⚙️ Admin : $res</div>";
+    // Envoi via la commande mail de Linux (Postfix)
+    $command = "echo " . escapeshellarg($msg) . " | mail -s " . escapeshellarg($subject) . " " . escapeshellarg($to);
+    shell_exec($command);
+    $message_sent = "<div class='badge success'>✉️ Message envoyé à $to !</div>";
 }
 ?>
 
@@ -50,68 +26,93 @@ if (isset($_POST['creer_user']) && $is_admin) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>CeriBox - Messagerie</title>
+    <title>CeriBox - Messagerie FAI</title>
     <link rel="stylesheet" href="../assets/style.css">
+    <style>
+        /* Style spécifique pour les mails */
+        .mail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .mail-card { 
+            background: white; border-left: 5px solid #3498db; 
+            margin-bottom: 15px; padding: 15px; border-radius: 5px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .mail-header { 
+            border-bottom: 1px solid #eee; padding-bottom: 8px; 
+            margin-bottom: 10px; font-size: 0.9em; color: #7f8c8d;
+        }
+        .mail-subject { display: block; font-weight: bold; color: #2c3e50; font-size: 1.1em; }
+        .mail-body { color: #34495e; line-height: 1.5; white-space: pre-wrap; }
+        .censored { color: #e74c3c; font-weight: bold; background: #fdeaea; padding: 0 4px; border-radius: 3px; }
+        .badge { padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../menu.php'; ?>
+    <?php include '../menu.php'; ?>
 
     <div class="main-content">
-        <div class="header-page">
-            <h1>Messagerie Postfix</h1>
-            <div>
-                <span class="badge" style="background: #3498db;">Session : <?= $currentUsername ?></span>
-                <?php if($is_expert): ?><span class="badge" style="background: #e67e22;">MODE EXPERT</span><?php endif; ?>
-                <?php if($is_admin): ?><span class="badge" style="background: #c0392b;">ADMIN</span><?php endif; ?>
-            </div>
-        </div>
+        <h1>📧 Messagerie Postfix</h1>
+        <p>Utilisateur : <strong><?= htmlspecialchars($user_email) ?></strong></p>
+        
+        <?= $message_sent ?>
 
-        <?php if (isset($feedback)) echo $feedback; ?>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="mail-container">
             <div class="card">
-                <h3>✉️ Nouveau Message</h3>
+                <h3>🆕 Nouveau Message</h3>
                 <form method="post">
-                    <input type="text" name="destinataire" placeholder="Destinataire (ex: user2@localhost)" required style="width:100%; margin-bottom:10px; padding:8px;">
-                    <input type="text" name="sujet" placeholder="Sujet" required style="width:100%; margin-bottom:10px; padding:8px;">
-                    <textarea name="message" placeholder="Votre message..." style="width:100%; height:80px; padding:8px;"></textarea>
-                    <button type="submit" name="envoyer_mail" class="btn-blue" style="width:100%; margin-top:10px;">Envoyer</button>
+                    <input type="text" name="to" placeholder="Destinataire (ex: bob@localhost)" required style="width:100%; margin-bottom:10px; padding:10px;">
+                    <input type="text" name="subject" placeholder="Sujet" required style="width:100%; margin-bottom:10px; padding:10px;">
+                    <textarea name="message" rows="6" placeholder="Votre message..." required style="width:100%; margin-bottom:10px; padding:10px;"></textarea>
+                    <button type="submit" name="send_mail" class="btn-blue" style="width:100%;">Envoyer le mail</button>
                 </form>
             </div>
 
             <div class="card">
-                <h3>📥 Boîte de réception de <?= $currentUsername ?></h3>
-                <div style="max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 10px; border-radius: 5px;">
-                    <?php if (empty($boite_reception)): ?>
-                        <p style="font-style: italic; color: #94a3b8;">Aucun message.</p>
-                    <?php else: ?>
-                        <?php foreach (array_reverse($boite_reception) as $m): ?>
-                            <div style="border-bottom: 1px solid #ddd; padding: 10px 0; font-size: 0.85em;">
-                                <pre style="white-space: pre-wrap;"><?= htmlspecialchars(substr($m, 0, 300)) ?></pre>
+                <h3>📥 Boîte de réception</h3>
+                <?php
+                if (file_exists($file_path) && filesize($file_path) > 0) {
+                    $content = file_get_contents($file_path);
+                    // On découpe le fichier mbox par les lignes commençant par "From "
+                    $emails = explode("\nFrom ", $content);
+
+                    foreach (array_reverse($emails) as $email) {
+                        if (empty(trim($email))) continue;
+
+                        // Extraction du Sujet
+                        preg_match('/Subject: (.*)/i', $email, $sub_match);
+                        $subject = $sub_match[1] ?? '(Sans sujet)';
+
+                        // Extraction de l'expéditeur
+                        preg_match('/From: (.*)/i', $email, $from_match);
+                        $sender = $from_match[1] ?? 'Inconnu';
+
+                        // Extraction du corps (après les headers)
+                        $parts = preg_split("/\n\s*\n/", $email, 2);
+                        $body = isset($parts[1]) ? trim($parts[1]) : "Contenu vide";
+
+                        // --- TÂCHE S6 : FILTRAGE DE SÉCURITÉ ---
+                        $mots_interdits = ["hack", "virus", "crack", "password", "root"];
+                        $body_filtre = str_ireplace(
+                            $mots_interdits, 
+                            "<span class='censored'>[CENSURÉ]</span>", 
+                            htmlspecialchars($body)
+                        );
+                        ?>
+                        <div class="mail-card">
+                            <div class="mail-header">
+                                <span class="mail-subject"><?= htmlspecialchars($subject) ?></span>
+                                <span>De : <?= htmlspecialchars($sender) ?></span>
                             </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                            <div class="mail-body"><?= nl2br($body_filtre) ?></div>
+                        </div>
+                        <?php
+                    }
+                } else {
+                    echo "<p style='color:#7f8c8d; text-align:center;'>Votre boîte est vide. 📭</p>";
+                }
+                ?>
             </div>
         </div>
-
-        <?php if ($is_expert): ?>
-        <div class="card" style="margin-top:20px; border-left: 5px solid #e67e22;">
-            <h3>🛠️ Configuration Expert (Postfix)</h3>
-            <p>Statut du service : <strong><?= shell_exec("systemctl is-active postfix") ?></strong></p>
-            [cite_start]<p style="font-size: 0.9em;">Protocoles supportés : POP3, IMAP, SMTP [cite: 38]</p>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($is_admin): ?>
-        <div class="card" style="margin-top:20px; border-left: 5px solid #c0392b;">
-            <h3>👤 Administration : Création de compte Mail</h3>
-            <form method="post" style="display: flex; gap: 10px;">
-                <input type="text" name="nom_user" placeholder="Nom du nouveau client (ex: alice)" required style="flex:1; padding:8px;">
-                <button type="submit" name="creer_user" class="btn-blue" style="background: #c0392b;">Créer le compte système</button>
-            </form>
-        </div>
-        <?php endif; ?>
     </div>
 </body>
 </html>
