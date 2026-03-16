@@ -1,18 +1,48 @@
-/* Barre latérale fixe à gauche */
+/* 1. VARIABLES & RESET */
+:root {
+    --primary: #2563eb;    /* Bleu moderne */
+    --expert: #f59e0b;     /* Orange expert */
+    --bg: #f8fafc;         /* Fond de page gris très clair */
+    --sidebar-bg: #1e293b; /* Bleu très foncé pour le menu */
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --transition: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+}
+
+/* 2. BARRE LATÉRALE (SIDEBAR) */
 .sidebar {
     width: 260px;
     height: 100vh;
-    background: #2c3e50; /* Bleu foncé pro */
+    background: var(--sidebar-bg);
     color: white;
     position: fixed;
     left: 0;
     top: 0;
     padding: 20px 0;
+    z-index: 1000;
 }
 
 .sidebar-brand {
     padding: 0 25px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-brand h2 {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
 }
 
 .sidebar-menu {
@@ -21,116 +51,126 @@
 }
 
 .sidebar-menu li a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 25px;
-    color: #bdc3c7;
+    color: #94a3b8;
     text-decoration: none;
-    transition: 0.3s;
+    transition: var(--transition);
+}
+
+.sidebar-menu li a i {
+    width: 20px;
+    text-align: center;
 }
 
 .sidebar-menu li a:hover, .sidebar-menu li a.active {
-    background: #34495e;
+    background: rgba(255,255,255,0.05);
     color: white;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--primary);
 }
 
 .menu-label {
     padding: 15px 25px 5px;
-    font-size: 0.75em;
+    font-size: 0.7em;
+    font-weight: 700;
     text-transform: uppercase;
-    color: #7f8c8d;
+    color: #475569;
+    letter-spacing: 1px;
 }
 
-/* IMPORTANT : Décale le contenu principal pour ne pas être sous le menu */
+/* 3. LAYOUT PRINCIPAL */
 .main-content {
     margin-left: 260px;
     padding: 40px;
     width: calc(100% - 260px);
+    min-height: 100vh;
 }
 
-.mail-card {
-    background: white;
-    border-left: 5px solid #3498db;
-    margin-bottom: 15px;
-    padding: 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.mail-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
+.header-page {
+    margin-bottom: 30px;
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
-    color: #2c3e50;
+    align-items: center;
 }
 
-.mail-body {
-    color: #555;
-    line-height: 1.6;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.mail-sender { color: #2980b9; }
-/* Palette Moderne */
-:root {
-    --primary: #2563eb;
-    --expert: #f59e0b;
-    --bg: #f8fafc;
-    --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-}
-
-/* Grille de cartes */
+/* 4. COMPOSANTS (CARTES & BADGES) */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-top: 2rem;
 }
 
-.dashboard-card {
+.card, .dashboard-card {
     background: var(--card-bg);
     border-radius: 12px;
     padding: 1.5rem;
-    text-decoration: none;
-    color: var(--text-main);
-    transition: all 0.3s ease;
     border: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
+    transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
 }
 
 .dashboard-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     border-color: var(--primary);
 }
 
-/* Icônes de cartes */
 .card-icon {
     font-size: 2rem;
     color: var(--primary);
     margin-bottom: 1rem;
+    display: block;
 }
 
-.dashboard-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+/* Badge Expert dynamique */
+.status-badge-mini {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7em;
+    font-weight: bold;
+    margin-top: 5px;
 }
 
-.dashboard-card p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.5;
+/* 5. MESSAGERIE (MAIL CARDS) */
+.mail-card {
+    background: white;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Badge Expert sur les cartes */
-.expert-border {
-    border-left: 4px solid var(--expert);
+.mail-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
 }
+
+.mail-subject { font-weight: bold; color: var(--text-main); }
+.mail-body { color: var(--text-muted); line-height: 1.6; }
+
+/* 6. MODE EXPERT */
+.expert-border { border-left: 5px solid var(--expert) !important; }
+.censored { color: #ef4444; font-weight: bold; background: #fee2e2; padding: 0 4px; border-radius: 4px; }
+
+/* 7. BOUTONS */
+.btn-blue {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    background: var(--primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-blue:hover { opacity: 0.9; transform: scale(1.02); }
