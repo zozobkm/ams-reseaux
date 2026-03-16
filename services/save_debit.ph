@@ -2,19 +2,18 @@
 require_once 'db.php';
 session_start();
 
-if (isset($_POST['debit']) && isset($_POST['temps']) && isset($_POST['taille'])) {
+if (isset($_POST['debit'])) {
     try {
-        // Insertion précise selon ton DESCRIBE
-        $sql = "INSERT INTO tests_debit (temps_sec, taille_mo, debit_mbps) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
+        // On insère les données. La colonne date_tes se remplira toute seule.
+        $stmt = $pdo->prepare("INSERT INTO tests_debit (temps_sec, taille_mo, debit_mbps) VALUES (?, ?, ?)");
         $stmt->execute([
-            $_POST['temps'],  // Correspond à temps_sec
-            $_POST['taille'], // Correspond à taille_mo
-            $_POST['debit']   // Correspond à debit_mbps
+            $_POST['temps'] ?? 0, 
+            $_POST['taille'] ?? 10, 
+            $_POST['debit']
         ]);
-        echo "Données insérées avec succès.";
+        echo "OK";
     } catch (PDOException $e) {
-        echo "Erreur SQL : " . $e->getMessage();
+        error_log($e->getMessage());
+        echo "Erreur";
     }
 }
-?>
