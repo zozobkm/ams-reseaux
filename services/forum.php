@@ -4,10 +4,10 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
-// 2. Sécurité : Vérifier si l'utilisateur est bien connecté
-// On suppose que require_login.php redirige vers login.php sinon
+// 2. Sécurité : Connexion et Modules
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php'; 
+require_once __DIR__ . "/../services/security.php"; // IMPORTATION DU FILTRE S6
 
 /* ===== LOGIQUE MODE EXPERT (ADMIN) ===== */
 $ADMIN_KEY = "admin123";
@@ -24,14 +24,15 @@ try {
             ORDER BY m.date_post DESC";
     $stmt = $pdo->query($sql);
     $messages = $stmt->fetchAll();
-    // --- AJOUT S6 : TRAITEMENT DE CHAÎNE (CENSURE) ---
-    $mots_interdits = ["hack", "virus", "piratage", "pwned"];
+
+    // --- MISE À JOUR S6 : CENSURE CENTRALISÉE ---
     foreach ($messages as &$msg) {
-        // On nettoie le contenu avant l'affichage
-        $msg['contenu'] = str_ireplace($mots_interdits, " [CENSURÉ] ", $msg['contenu']);
+        // 1. On sécurise contre le XSS
+        $propre = htmlspecialchars($msg['contenu']);
+        // 2. On applique la censure via la fonction centrale
+        $msg['contenu_affiche'] = filtrer_censure($propre);
     }
-    // Ne pas oublier de casser la référence après le foreach
-    unset($msg);
+    unset($msg); // Sécurité PHP après une référence &
 } catch (PDOException $e) {
     $error_sql = $e->getMessage();
 }
@@ -42,6 +43,10 @@ try {
     <meta charset="UTF-8">
     <title>CeriBox - Forum d'entraide</title>
     <link rel="stylesheet" href="../assets/style.css">
+    <style>
+        /* On rajoute le style pour que le mot censuré claque bien */
+        .censored { color: #e74c3c; font-weight: bold; background: #fdeaea; padding: 0 4px; border-radius: 3px; }
+    </style>
 </head>
 <body>
 
@@ -75,7 +80,8 @@ try {
             <form method="post" action="post.php" style="margin-top: 15px;">
                 <div style="margin-bottom: 15px; padding: 10px; background: #f1f5f9; border-radius: 5px;">
                     <span style="color: #64748b; font-size: 0.85em;">Connecté en tant que :</span><br>
-                    <strong><?= htmlspecialchars($_SESSION['email']) ?></strong> </div>
+                    <strong><?= htmlspecialchars($_SESSION['email']) ?></strong> 
+                </div>
 
                 <textarea name="contenu" placeholder="Décrivez votre demande ici..." required 
                           style="width: 100%; height: 100px; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
@@ -97,13 +103,16 @@ try {
                             <strong style="color: #1e293b;"><?= htmlspecialchars($msg['email']) ?></strong>
                             <small style="color: #94a3b8;"><?= $msg['date_post'] ?></small>
                         </div>
-                        <p style="margin: 0; color: #334155; line-height: 1.5;"><?= nl2br(htmlspecialchars($msg['contenu'])) ?></p>
+                        
+                        <p style="margin: 0; color: #334155; line-height: 1.6;">
+                            <?= nl2br($msg['contenu_affiche']) ?>
+                        </p>
                         
                         <?php if ($is_admin): ?>
                             <form method="post" action="delete.php" onsubmit="return confirm('Supprimer ce message ?');" style="margin-top: 10px;">
                                 <input type="hidden" name="id" value="<?= $msg['id'] ?>">
                                 <button type="submit" style="background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.8em; font-weight: bold;">
-                                    [ Supprimer]
+                                    [ Supprimer ]
                                 </button>
                             </form>
                         <?php endif; ?>
