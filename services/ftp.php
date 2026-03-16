@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php';
 
-// --- LOGIQUE S6 : MODE EXPERT & SUPPRESSION ---
+// --- LOGIQUE EXPERT ---
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
@@ -12,17 +12,16 @@ if (isset($_POST['clear_db']) && $is_avance) {
     exit;
 }
 
-// --- RÉCUPÉRATION DES DONNÉES (Tâche S5/S6) ---
-$labels = [];
-$values = [];
+// --- RÉCUPÉRATION DES DONNÉES (Ordre DESC pour le tableau, ASC pour le graph) ---
 try {
-    // On prend les 10 derniers tests
-    $sql = "SELECT date_tes, debit_mbps FROM tests_debit ORDER BY date_tes DESC LIMIT 10";
-    $stmt = $pdo->query($sql);
-    $history = $stmt->fetchAll();
+    // 1. Pour le tableau (Les plus récents en haut)
+    $sql_tab = "SELECT date_tes, debit_mbps FROM tests_debit ORDER BY date_tes DESC LIMIT 10";
+    $history = $pdo->query($sql_tab)->fetchAll();
 
-    // On inverse pour le graphique (ordre chronologique)
+    // 2. Pour le graphique (Ordre chronologique)
     $chart_data = array_reverse($history);
+    $labels = [];
+    $values = [];
     foreach ($chart_data as $row) {
         $labels[] = date('H:i', strtotime($row['date_tes']));
         $values[] = $row['debit_mbps'];
@@ -50,7 +49,6 @@ try {
     <div class="main-content">
         <div class="header-page">
             <h1>Surveillance Flux & Débit</h1>
-            <span class="status-badge-mini" style="background: #10b981; color:white;">NOMINAL</span>
         </div>
 
         <div class="card" style="text-align: center; padding: 40px;">
@@ -72,7 +70,7 @@ try {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3><i class="fas fa-history"></i> Historique SQL</h3>
                     <?php if ($is_avance): ?>
-                        <form method="post" onsubmit="return confirm('Vider la table tests_debit ?');">
+                        <form method="post">
                             <button type="submit" name="clear_db" class="btn-blue" style="background: #ef4444; padding: 5px 10px; font-size: 0.8rem;">Vider</button>
                         </form>
                     <?php endif; ?>
@@ -90,6 +88,7 @@ try {
     </div>
 
 <script>
+// --- LE COEUR DU TEST ---
 async function runSpeedTest() {
     const btn = document.getElementById('start-btn');
     const display = document.getElementById('speed-display');
@@ -97,11 +96,14 @@ async function runSpeedTest() {
     const status = document.getElementById('test-status');
 
     btn.disabled = true;
-    status.innerText = "Téléchargement du flux de test...";
+    status.innerText = "Calcul du débit en cours...";
     
     const startTime = new Date().getTime();
     try {
+        // SOLUTION IP FIXE : On utilise un chemin relatif './' pour que le navigateur ne se perde pas
         const response = await fetch('./generate_test_file.php');
+        if (!response.ok) throw new Error();
+
         const reader = response.body.getReader();
         let received = 0;
         const total = 10 * 1024 * 1024; // 10 Mo
@@ -118,18 +120,25 @@ async function runSpeedTest() {
         const speed = (sizeMo / duration).toFixed(2);
 
         display.innerHTML = `${speed} <span style="font-size: 1.2rem;">Mo/s</span>`;
-        status.innerText = "Sauvegarde en base de données...";
+        status.innerText = "Mise à jour du graphique...";
 
-        await fetch('save_debit.php', {
+        // SAUVEGARDE SQL (Tâche S5/S6)
+        await fetch('./save_debit.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: `debit=${speed}&temps=${duration}&taille=${sizeMo}`
         });
 
-        setTimeout(() => location.reload(), 1200);
-    } catch (e) { status.innerText = "Erreur de connexion."; btn.disabled = false; }
+        // RECHARGEMENT POUR VOIR LES NOUVELLES DONNÉES DANS LE GRAPH/TABLEAU
+        setTimeout(() => { window.location.href = "ftp.php"; }, 1000);
+
+    } catch (e) { 
+        status.innerText = "Erreur : Impossible de joindre la Box sur " + window.location.hostname;
+        btn.disabled = false; 
+    }
 }
 
+// --- GRAPHIQUE ---
 const ctx = document.getElementById('debitChart').getContext('2d');
 new Chart(ctx, {
     type: 'line',
