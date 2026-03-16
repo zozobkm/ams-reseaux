@@ -31,10 +31,7 @@
             <a href="/ams-reseaux/services/forum.php">Forum Entraide</a>
         </li>
         <li class="menu-divider"></li>
-        <li>
-            <a href="/ams-reseaux/services/reglages.php">Réglages IP</a>
-        </li>
-        <li>
+        
             <a href="/ams-reseaux/auth/logout.php" style="color: #ff7675;">Déconnexion</a>
         </li>
     </ul>
