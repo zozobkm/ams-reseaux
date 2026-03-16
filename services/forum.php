@@ -69,8 +69,8 @@ try {
                 </form>
             <?php else: ?>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <p style="color: #27ae60; margin: 0;"><strong>Session Expert active.</strong> Suppression autorisée.</p>
-                    <a href="logout_expert.php" class="btn-blue" style="background: #e74c3c; text-decoration: none;">Quitter le mode expert</a>
+                    <p style="color: #27ae60; margin: 0;"><strong>Session admin active.</strong> Suppression autorisée.</p>
+                    <a href="logout_expert.php" class="btn-blue" style="background: #e74c3c; text-decoration: none;">Quitter le mode admin</a>
                 </div>
             <?php endif; ?>
         </div>
