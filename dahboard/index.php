@@ -1,12 +1,47 @@
+<?php
+session_start();
+// Vérification de connexion
+if (!isset($_SESSION["user_id"])) {
+    header("Location: /ams-reseaux/auth/login.php");
+    exit;
+}
+
+// Gestion des modes (Tâche S6)
+$mode = $_SESSION["mode"] ?? "normal";
+$is_avance = ($mode === "avance");
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CeriBox - Dashboard</title>
+    
+    <link rel="stylesheet" href="../assets/style.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<?php 
+// 3. Inclusion du menu (on remonte d'un dossier car on est dans /dahboard/)
+$menu_path = __DIR__ . '/../menu.php';
+if (file_exists($menu_path)) {
+    include $menu_path;
+} else {
+    echo "<div style='margin-left:280px; color:red;'>Erreur : menu.php introuvable dans $menu_path</div>";
+}
+?>
+
 <div class="main-content">
-    <div class="header-page" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="header-page">
         <div>
-            <h1 style="margin-bottom: 5px;">Tableau de bord</h1>
-            <p style="color: var(--text-muted);">Bienvenue, administrateur de la Box.</p>
+            <h1>Tableau de bord</h1>
+            <p style="color: var(--text-muted);">Bienvenue, <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong></p>
         </div>
         
         <form method="post" action="toggle_mode.php">
-            <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>; border:none; padding: 10px 20px; border-radius: 8px; color: white; cursor: pointer;">
+            <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>;">
                 <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> 
                 Mode <?= $is_avance ? "Normal" : "Avancé" ?>
             </button>
@@ -55,7 +90,10 @@
     <?php if ($is_avance): ?>
     <div class="dashboard-card" style="margin-top: 30px; border: 1px dashed #f59e0b; background: #fffbeb;">
         <h3 style="color: #b45309;"><i class="fas fa-triangle-exclamation"></i> Administration Système</h3>
-        <p>Le mode avancé est activé. Vous pouvez modifier les fichiers de configuration de la Box Ubuntu.</p>
+        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages de la Box Ubuntu.</p>
     </div>
     <?php endif; ?>
 </div>
+
+</body>
+</html>
