@@ -24,6 +24,14 @@ try {
             ORDER BY m.date_post DESC";
     $stmt = $pdo->query($sql);
     $messages = $stmt->fetchAll();
+    // --- AJOUT S6 : TRAITEMENT DE CHAÎNE (CENSURE) ---
+    $mots_interdits = ["hack", "virus", "piratage", "pwned"];
+    foreach ($messages as &$msg) {
+        // On nettoie le contenu avant l'affichage
+        $msg['contenu'] = str_ireplace($mots_interdits, " [CENSURÉ] ", $msg['contenu']);
+    }
+    // Ne pas oublier de casser la référence après le foreach
+    unset($msg);
 } catch (PDOException $e) {
     $error_sql = $e->getMessage();
 }
