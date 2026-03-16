@@ -17,7 +17,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'generate') {
 // --- 2. ACTION : SAUVEGARDE SQL ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['debit'])) {
     try {
-        // Insertion dans tests_debit
         $stmt = $pdo->prepare("INSERT INTO tests_debit (temps_sec, taille_mo, debit_mbps) VALUES (?, ?, ?)");
         $stmt->execute([$_POST['temps'], $_POST['taille'], $_POST['debit']]);
         echo "OK";
@@ -25,7 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['debit'])) {
     exit; 
 }
 
-// --- 3. RÉCUPÉRATION DONNÉES ---
+// --- 3. LOGIQUE S6 : VIDER L'HISTORIQUE (Mode Avancé uniquement) ---
+$mode = $_SESSION["mode"] ?? "normal";
+$is_avance = ($mode === "avance");
+
+if (isset($_POST['clear_db']) && $is_avance) {
+    $pdo->exec("DELETE FROM tests_debit");
+    header("Location: ftp.php");
+    exit;
+}
+
+// --- 4. RÉCUPÉRATION DONNÉES ---
 $history = $pdo->query("SELECT * FROM tests_debit ORDER BY id DESC LIMIT 10")->fetchAll();
 $chart_data = array_reverse($history);
 $labels = []; $values = [];
@@ -41,7 +50,7 @@ foreach ($chart_data as $row) {
     <title>CeriBox - Débit</title>
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/chart.min.js"></script>
     <style>
         .speed-value { font-size: 3.5rem; font-weight: 800; color: #2563eb; margin: 10px 0; }
         .progress-container { width: 100%; background: #edf2f7; height: 12px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
@@ -53,20 +62,30 @@ foreach ($chart_data as $row) {
 
     <div class="main-content">
         <h1>Surveillance Flux & Débit</h1>
+        
         <div class="card" style="text-align: center; padding: 40px;">
             <div id="speed-display" class="speed-value">0.00 <span style="font-size: 1.2rem;">Mo/s</span></div>
-            <p id="test-status">Prêt pour le test</p>
+            <p id="test-status">Prêt pour le test (Mesure réelle 10 Mo)</p>
             <div class="progress-container"><div id="progress-bar"></div></div>
-            <button id="start-btn" onclick="runSpeedTest()" class="btn-blue">LANCER LE TEST</button>
+            <button id="start-btn" onclick="runSpeedTest()" class="btn-blue" style="padding: 15px 50px; border-radius: 50px;">
+                <i class="fas fa-play"></i> LANCER LE TEST
+            </button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px;">
             <div class="card">
-                <h3>📈 Graphique</h3>
+                <h3>📈 Graphique de performance</h3>
                 <div style="height: 250px;"><canvas id="debitChart"></canvas></div>
             </div>
             <div class="card">
-                <h3>📂 Historique SQL</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>📂 Historique SQL</h3>
+                    <?php if ($is_avance): ?>
+                        <form method="post" onsubmit="return confirm('Vider tout l\'historique ?');">
+                            <button type="submit" name="clear_db" class="btn-blue" style="background: #ef4444; padding: 5px 10px; font-size: 0.8rem;">Vider</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
                 <table style="width: 100%; font-size: 0.9rem;">
                     <?php foreach ($history as $h): ?>
                     <tr style="border-bottom: 1px solid #eee;">
@@ -87,13 +106,13 @@ function runSpeedTest() {
     const status = document.getElementById('test-status');
 
     btn.disabled = true;
-    status.innerText = "Téléchargement en cours...";
+    status.innerText = "Téléchargement du flux de test...";
     
     const startTime = new Date().getTime();
     const xhr = new XMLHttpRequest();
+    // Utilisation de l'URL relative pour la compatibilité IP fixe
     const url = 'ftp.php?action=generate&t=' + new Date().getTime();
 
-    // Suivi de la progression (Compatible VM)
     xhr.onprogress = function(e) {
         if (e.lengthComputable) {
             const percent = (e.loaded / e.total) * 100;
@@ -109,9 +128,8 @@ function runSpeedTest() {
             const speed = (sizeMo / duration).toFixed(2);
 
             display.innerHTML = speed + ' <span style="font-size: 1.2rem;">Mo/s</span>';
-            status.innerText = "Enregistrement en base...";
+            status.innerText = "Enregistrement en base de données...";
 
-            // Sauvegarde via POST
             const saveXhr = new XMLHttpRequest();
             saveXhr.open('POST', 'ftp.php', true);
             saveXhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -121,16 +139,16 @@ function runSpeedTest() {
     };
 
     xhr.onerror = function() {
-        status.innerText = "Erreur de connexion réseau";
+        status.innerText = "Erreur réseau : Vérifiez la connexion à la Box";
         btn.disabled = false;
     };
 
     xhr.open('GET', url, true);
-    xhr.responseType = 'arraybuffer'; // Crucial pour mesurer la taille réelle
+    xhr.responseType = 'arraybuffer';
     xhr.send();
 }
 
-// Initialisation du graphique
+// Affichage du graphique si Chart.js est présent
 if (window.Chart) {
     const ctx = document.getElementById('debitChart').getContext('2d');
     new Chart(ctx, {
@@ -138,7 +156,7 @@ if (window.Chart) {
         data: {
             labels: <?= json_encode($labels) ?>,
             datasets: [{
-                label: 'Mo/s',
+                label: 'Débit Mo/s',
                 data: <?= json_encode($values) ?>,
                 borderColor: '#2563eb',
                 tension: 0.4,
