@@ -79,7 +79,7 @@ async function runSpeedTest() {
     
     const startTime = new Date().getTime();
     try {
-        const response = await fetch('generate_test_file.php');
+        const response = await fetch('/ams-reseaux/services/generate_test_file.php');
         const reader = response.body.getReader();
         let received = 0;
         const total = 10 * 1024 * 1024; // 10Mo
