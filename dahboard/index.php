@@ -10,15 +10,15 @@ if (!isset($_SESSION["user_id"])) {
 // 2. Inclusion de la configuration base de données
 require_once __DIR__ . '/../config.php';
 
-// 3. Gestion des modes 
+// 3. Gestion des modes (Tâche S6)
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
 // 4. Logique du bouton "Scanner le réseau"
 if (isset($_POST['run_scan'])) {
-    // Exécution du script Python de traitement de caractères
-    shell_exec('sudo python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
-    // Rafraîchissement pour afficher les nouvelles données
+    // Exécution du script Python avec le chemin complet pour éviter les erreurs d'environnement
+    shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
+    // Rafraîchissement de la page pour charger les données SQL mises à jour
     header("Location: /ams-reseaux/dashboard/index.php");
     exit;
 }
@@ -112,7 +112,7 @@ if (file_exists($menu_path)) {
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
-                    <tr style="border-bottom: 2px solid #e5e7eb; color: var(--text-muted); font-size: 0.9rem;">
+                    <tr style="border-bottom: 2px solid #e5e7eb; color: var(--text-muted); font-size: 0.85rem;">
                         <th style="padding: 12px;">ADRESSE IP</th>
                         <th style="padding: 12px;">ADRESSE MAC</th>
                         <th style="padding: 12px;">DERNIÈRE ACTIVITÉ</th>
@@ -124,18 +124,18 @@ if (file_exists($menu_path)) {
                     <?php if (mysqli_num_rows($result_devices) > 0): ?>
                         <?php while($dev = mysqli_fetch_assoc($result_devices)): ?>
                         <tr style="border-bottom: 1px solid #f3f4f6;">
-                            <td style="padding: 12px; font-weight: 500;"><?= htmlspecialchars($dev['ip_address']) ?></td>
+                            <td style="padding: 12px; font-weight: 600;"><?= htmlspecialchars($dev['ip_address']) ?></td>
                             <td style="padding: 12px;"><code><?= htmlspecialchars($dev['mac_address']) ?></code></td>
                             <td style="padding: 12px; font-size: 0.85rem; color: #6b7280;"><?= $dev['last_seen'] ?></td>
                             <td style="padding: 12px;">
-                                <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;
+                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;
                                     background: <?= $dev['statut_debit'] == 'normal' ? '#d1fae5' : '#fee2e2' ?>; 
                                     color: <?= $dev['statut_debit'] == 'normal' ? '#065f46' : '#991b1b' ?>;">
                                     <?= strtoupper(htmlspecialchars($dev['statut_debit'])) ?>
                                 </span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <button class="btn-blue" style="padding: 5px 10px; background: #6b7280;" title="Configurer les limites">
+                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;" title="Paramètres">
                                     <i class="fas fa-sliders"></i>
                                 </button>
                             </td>
@@ -143,8 +143,8 @@ if (file_exists($menu_path)) {
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" style="padding: 30px; text-align: center; color: var(--text-muted);">
-                                <i class="fas fa-search"></i> Aucun appareil n'a encore été enregistré.
+                            <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                                <i class="fas fa-search"></i> Aucun appareil n'a encore été enregistré en base de données.
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -156,7 +156,7 @@ if (file_exists($menu_path)) {
     <?php if ($is_avance): ?>
     <div class="dashboard-card" style="margin-top: 30px; border: 1px dashed #f59e0b; background: #fffbeb;">
         <h3 style="color: #b45309;"><i class="fas fa-triangle-exclamation"></i> Administration Système</h3>
-        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages de la Box Ubuntu.</p>
+        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages bas-niveau de la Box.</p>
     </div>
     <?php endif; ?>
 </div>
