@@ -10,20 +10,27 @@ if (!isset($_SESSION["user_id"])) {
 // 2. Inclusion de la configuration base de données
 require_once __DIR__ . '/../config.php';
 
-// 3. Gestion des modes (Tâche S6)
+// 3. Gestion des modes
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
-// 4. Logique du bouton "Scanner le réseau"
+// 4. Logique du bouton "Scanner le réseau" avec débogage
 if (isset($_POST['run_scan'])) {
-    // Exécution du script Python avec le chemin complet pour éviter les erreurs d'environnement
-    shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
-    // Rafraîchissement de la page pour charger les données SQL mises à jour
+    // On capture la sortie ET les erreurs (2>&1)
+    $cmd = 'sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py 2>&1';
+    $output = shell_exec($cmd);
+    
+    // Si le script renvoie quelque chose, on l'affiche en alerte pour comprendre le blocage
+    if ($output) {
+        $msg = addslashes(trim($output));
+        echo "<script>alert('Résultat du système : $msg'); window.location.href='/ams-reseaux/dashboard/index.php';</script>";
+        exit;
+    }
     header("Location: /ams-reseaux/dashboard/index.php");
     exit;
 }
 
-// 5. Récupération des appareils depuis la table SQL
+// 5. Récupération des appareils
 $query_devices = "SELECT * FROM devices ORDER BY last_seen DESC";
 $result_devices = mysqli_query($conn, $query_devices);
 ?>
@@ -39,11 +46,8 @@ $result_devices = mysqli_query($conn, $query_devices);
 <body>
 
 <?php 
-// Inclusion du menu latéral
 $menu_path = __DIR__ . '/../menu.php';
-if (file_exists($menu_path)) {
-    include $menu_path;
-}
+if (file_exists($menu_path)) { include $menu_path; }
 ?>
 
 <div class="main-content">
@@ -52,50 +56,23 @@ if (file_exists($menu_path)) {
             <h1>Tableau de bord</h1>
             <p style="color: var(--text-muted);">Bienvenue, <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong></p>
         </div>
-        
         <form method="post" action="toggle_mode.php">
             <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>;">
-                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> 
-                Mode <?= $is_avance ? "Normal" : "Avancé" ?>
+                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> Mode <?= $is_avance ? "Normal" : "Avancé" ?>
             </button>
         </form>
     </div>
 
     <div class="dashboard-grid">
-        <a href="/ams-reseaux/services/forum.php" class="dashboard-card">
-            <i class="fas fa-comments card-icon" style="color: #10b981;"></i>
-            <h3>Forum Communautaire</h3>
-            <p>Accédez aux discussions et entraidez les clients du FAI.</p>
-        </a>
-
-        <a href="/ams-reseaux/services/dhcp.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
+        <a href="/ams-reseaux/services/dhcp.php" class="dashboard-card">
             <i class="fas fa-network-wired card-icon"></i>
             <h3>Service DHCP</h3>
-            <p>Gestion de l'attribution dynamique des adresses IP locales.</p>
+            <p>Gestion des IP locales.</p>
         </a>
-
-        <a href="/ams-reseaux/services/dns.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
-            <i class="fas fa-database card-icon"></i>
-            <h3>Service DNS</h3>
-            <p>Résolution de noms et annuaire local du domaine box.local.</p>
-        </a>
-
-        <a href="/ams-reseaux/services/mail.php" class="dashboard-card">
-            <i class="fas fa-envelope-open-text card-icon" style="color: #6366f1;"></i>
-            <h3>Messagerie Postfix</h3>
-            <p>Consultez et envoyez vos emails via le serveur local.</p>
-        </a>
-
-        <a href="/ams-reseaux/services/ftp.php" class="dashboard-card">
-            <i class="fas fa-gauge-high card-icon" style="color: #ec4899;"></i>
-            <h3>Débit & Performance</h3>
-            <p>Tests de bande passante et transferts de fichiers FTP.</p>
-        </a>
-
-        <a href="/ams-reseaux/services/nat.php" class="dashboard-card <?= $is_avance ? 'expert-border' : '' ?>">
+        <a href="/ams-reseaux/services/nat.php" class="dashboard-card">
             <i class="fas fa-shield-virus card-icon"></i>
             <h3>Sécurité & NAT</h3>
-            <p>Configuration du pare-feu et redirection de ports (PAT).</p>
+            <p>Pare-feu et ports.</p>
         </a>
     </div>
 
@@ -128,38 +105,22 @@ if (file_exists($menu_path)) {
                             <td style="padding: 12px;"><code><?= htmlspecialchars($dev['mac_address']) ?></code></td>
                             <td style="padding: 12px; font-size: 0.85rem; color: #6b7280;"><?= $dev['last_seen'] ?></td>
                             <td style="padding: 12px;">
-                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;
-                                    background: <?= $dev['statut_debit'] == 'normal' ? '#d1fae5' : '#fee2e2' ?>; 
-                                    color: <?= $dev['statut_debit'] == 'normal' ? '#065f46' : '#991b1b' ?>;">
+                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #d1fae5; color: #065f46;">
                                     <?= strtoupper(htmlspecialchars($dev['statut_debit'])) ?>
                                 </span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;" title="Paramètres">
-                                    <i class="fas fa-sliders"></i>
-                                </button>
+                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;"><i class="fas fa-sliders"></i></button>
                             </td>
                         </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <tr>
-                            <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">
-                                <i class="fas fa-search"></i> Aucun appareil n'a encore été enregistré en base de données.
-                            </td>
-                        </tr>
+                        <tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">Aucun appareil trouvé.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
-
-    <?php if ($is_avance): ?>
-    <div class="dashboard-card" style="margin-top: 30px; border: 1px dashed #f59e0b; background: #fffbeb;">
-        <h3 style="color: #b45309;"><i class="fas fa-triangle-exclamation"></i> Administration Système</h3>
-        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages bas-niveau de la Box.</p>
-    </div>
-    <?php endif; ?>
 </div>
-
 </body>
 </html>
