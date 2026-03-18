@@ -7,19 +7,21 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
-// 2. Inclusion de la config 
+// 2. Inclusion de la configuration (PDO $pdo_box)
 require_once __DIR__ . '/../config.php';
 
 // 3. Logique du bouton "Scanner le réseau"
 if (isset($_POST['run_scan'])) {
     // Exécution du script Python
+    // Utilisation de sudo car www-data a les droits dans visudo
     shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
     
+    // Redirection vers le dossier actuel (dahboard sans s)
     header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
 
-// 4. Récupération des données 
+// 4. Récupération des données avec PDO ($pdo_box)
 try {
     $stmt = $pdo_box->query("SELECT * FROM devices ORDER BY last_seen DESC");
     $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -42,7 +44,7 @@ $is_avance = ($mode === "avance");
 <body>
 
 <?php 
-// 5. Inclusion du menu 
+// 5. Inclusion du menu latéral
 $menu_path = __DIR__ . '/../menu.php';
 if (file_exists($menu_path)) {
     include $menu_path;
@@ -132,14 +134,19 @@ if (file_exists($menu_path)) {
                             <td style="padding: 12px;"><code><?= htmlspecialchars($dev['mac_address']) ?></code></td>
                             <td style="padding: 12px; font-size: 0.85rem; color: #6b7280;"><?= $dev['last_seen'] ?></td>
                             <td style="padding: 12px;">
-                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #d1fae5; color: #065f46;">
+                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; 
+                                      background: <?= $dev['statut_debit'] == 'normal' ? '#d1fae5' : '#fee2e2' ?>; 
+                                      color: <?= $dev['statut_debit'] == 'normal' ? '#065f46' : '#991b1b' ?>;">
                                     <?= strtoupper(htmlspecialchars($dev['statut_debit'])) ?>
                                 </span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;" title="Paramètres">
+                                <a href="manage_device.php?mac=<?= urlencode($dev['mac_address']) ?>" 
+                                   class="btn-blue" 
+                                   style="padding: 6px 10px; background: #64748b; text-decoration: none;" 
+                                   title="Gérer cet appareil">
                                     <i class="fas fa-sliders"></i>
-                                </button>
+                                </a>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -158,7 +165,7 @@ if (file_exists($menu_path)) {
     <?php if ($is_avance): ?>
     <div class="dashboard-card" style="margin-top: 30px; border: 1px dashed #f59e0b; background: #fffbeb;">
         <h3 style="color: #b45309;"><i class="fas fa-triangle-exclamation"></i> Administration Système</h3>
-        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages bas-niveau de la Box.</p>
+        <p>Le mode avancé est activé. Vous avez un accès direct aux réglages bas-niveau de la Box Ubuntu.</p>
     </div>
     <?php endif; ?>
 </div>
