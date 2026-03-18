@@ -2,7 +2,6 @@
 require_once "../auth/require_login.php";
 require_once "../services/db.php";
 
-// Sécurité : Seul le patron (Admin) peut créer des gens
 if ($_SESSION['role'] !== 'admin') {
     die("Accès refusé. Seul l'administrateur peut créer des comptes.");
 }
@@ -21,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt = $pdo->prepare("INSERT INTO box_users (email, password_hash, role) VALUES (?, ?, ?)");
         $stmt->execute([$email, $hash, $role]);
 
-        // 3. Création Linux pour Postfix (S5)
+        // 3. Création Linux pour Postfix 
         shell_exec("sudo adduser $user_linux --gecos '' --disabled-password");
         shell_exec("echo '$user_linux:$pass' | sudo chpasswd");
 
