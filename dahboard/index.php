@@ -26,7 +26,7 @@ if (isset($_POST['run_scan'])) {
         echo "<script>alert('Résultat du système : $msg'); window.location.href='/ams-reseaux/dashboard/index.php';</script>";
         exit;
     }
-    header("Location: /ams-reseaux/dashboard/index.php");
+    header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
 
