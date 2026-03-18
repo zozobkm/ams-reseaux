@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../auth/require_login.php";
 require_once __DIR__ . "/../services/db.php";
-require_once __DIR__ . "/../services/security.php"; // On charge le filtre une seule fois en haut
+require_once __DIR__ . "/../services/security.php"; 
 
 $user_email = $_SESSION['email'];
 $user_linux = explode('@', $user_email)[0];
@@ -74,10 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send_mail'])) {
                         $parts = preg_split("/\n\s*\n/", $email, 2);
                         $body = isset($parts[1]) ? trim($parts[1]) : "Contenu vide";
 
-                        // --- TÂCHE S6 : FILTRAGE CENTRALISÉ ---
-                        // 1. On nettoie le texte contre les failles XSS
                         $body_propre = htmlspecialchars($body);
-                        // 2. On applique la censure via notre fonction centrale
+                 
                         $body_final = filtrer_censure($body_propre);
                         ?>
                         
