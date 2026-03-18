@@ -18,7 +18,9 @@
         <li class="menu-label">Services Réseaux</li>
         <li><a href="/ams-reseaux/services/dhcp.php"><i class="fas fa-network-wired"></i> DHCP</a></li>
         <li><a href="/ams-reseaux/services/dns.php"><i class="fas fa-server"></i> DNS</a></li>
-        <li><a href="/ams-reseaux/services/nat.php"><i class="fas fa-shield-halved"></i> NAT / Firewall</a></li>
+        <?php if (($_SESSION["mode"] ?? "normal") === "avance"): ?>
+        <li><a href="/ams-reseaux/services/nat.php"><i class="fas fa-shield-virus"></i> NAT / Firewall</a></li>
+        <?php endif; ?>
        <li><a href="/ams-reseaux/services/securite.php" class="menu-item"><i class="fas fa-user-shield"></i> Contrôle Parental</a></li>
         
         <li class="menu-label">Applications</li>
