@@ -3,7 +3,7 @@ import re
 import mysql.connector
 from datetime import datetime
 
-# Ta config SQL habituelle
+# Configuration extraite de ton config.php
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'forumuser',
@@ -11,13 +11,11 @@ DB_CONFIG = {
     'database': 'box'
 }
 
-def scan_network():
-    # 1. On récupère la table ARP du système (Texte brut)
-    stream = os.popen('arp -an')
-    output = stream.read()
-
-    # 2. TRAITEMENT DE CARACTÈRES (Analyse approfondie)
-    # On cherche les patterns : (IP) at (MAC)
+def scan():
+    # Lecture de la table ARP du système
+    output = os.popen('arp -an').read()
+    
+    # TRAITEMENT DE CARACTÈRES : Extraction IP et MAC
     devices_found = re.findall(r'\((\d+\.\d+\.\d+\.\d+)\) at ([0-9a-fA-F:]+)', output)
 
     try:
@@ -25,7 +23,6 @@ def scan_network():
         cursor = db.cursor()
 
         for ip, mac in devices_found:
-            # On enregistre ou on met à jour chaque appareil 
             query = """
                 INSERT INTO devices (ip_address, mac_address, last_seen)
                 VALUES (%s, %s, %s)
@@ -35,9 +32,10 @@ def scan_network():
         
         db.commit()
         db.close()
-        print(f"[{datetime.now()}] Scan terminé : {len(devices_found)} appareils trouvés.")
+        # Correction de la syntaxe pour les anciennes versions de Python
+        print("[{}] Scan terminé : {} appareils trouvés.".format(datetime.now(), len(devices_found)))
     except Exception as e:
-        print(f"Erreur SQL : {e}")
+        print("Erreur : {}".format(e))
 
 if __name__ == "__main__":
-    scan_network()
+    scan()
