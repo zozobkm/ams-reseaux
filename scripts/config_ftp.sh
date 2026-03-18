@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: ./config_ftp.sh [upload|download]
+
 
 ACTION=$1
 # --- CONFIGURATION ---
@@ -7,7 +7,7 @@ SERVEUR_FTP="ftp.ceri.com"
 USER="ftpuser"
 PASS="ftp123"
 FICHIER_TEST="/tmp/test_debit.dat"
-LOG_FILE="/home/stud/ftp_audit.log" # Fichier crucial pour la S6
+LOG_FILE="/home/stud/ftp_audit.log" 
 
 # 1. Création du fichier de test de 10Mo si absent
 if [ ! -f $FICHIER_TEST ]; then
@@ -32,7 +32,7 @@ fi
 DIFF=$(echo "$END - $START" | bc)
 VITESSE=$(echo "scale=2; 10 / $DIFF" | bc)
 
-# --- STOCKAGE S6 : Journalisation dans le fichier texte ---
+# --- Journalisation dans le fichier texte ---
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 echo "$TIMESTAMP | $ACTION | $VITESSE" >> "$LOG_FILE"
 
