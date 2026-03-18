@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 // 2. Inclusion de la configuration base de données
 require_once __DIR__ . '/../config.php';
 
-// 3. Gestion des modes (Tâche S6)
+// 3. Gestion des modes 
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
