@@ -3,42 +3,33 @@ session_start();
 
 // 1. Vérification de connexion
 if (!isset($_SESSION["user_id"])) {
+    
     header("Location: /ams-reseaux/auth/login.php");
     exit;
 }
 
-// 2. Inclusion de la configuration base de données
 require_once __DIR__ . '/../config.php';
 
-// 3. Gestion des modes
-$mode = $_SESSION["mode"] ?? "normal";
-$is_avance = ($mode === "avance");
-
-// 4. Logique du bouton "Scanner le réseau" avec débogage
+// 3. Logique du bouton "Scanner le réseau"
 if (isset($_POST['run_scan'])) {
-    // On capture la sortie ET les erreurs (2>&1)
-    $cmd = 'sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py 2>&1';
-    $output = shell_exec($cmd);
+    // Exécution du script Python
+    shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
     
-    // Si le script renvoie quelque chose, on l'affiche en alerte pour comprendre le blocage
-    if ($output) {
-        $msg = addslashes(trim($output));
-        echo "<script>alert('Résultat du système : $msg'); window.location.href='/ams-reseaux/dashboard/index.php';</script>";
-        exit;
-    }
     header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
 
-// 5. Récupération des appareils
+// 4. Récupération des données
 $query_devices = "SELECT * FROM devices ORDER BY last_seen DESC";
 $result_devices = mysqli_query($conn, $query_devices);
+
+$mode = $_SESSION["mode"] ?? "normal";
+$is_avance = ($mode === "avance");
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CeriBox - Dashboard</title>
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -56,21 +47,23 @@ if (file_exists($menu_path)) { include $menu_path; }
             <h1>Tableau de bord</h1>
             <p style="color: var(--text-muted);">Bienvenue, <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong></p>
         </div>
+        
         <form method="post" action="toggle_mode.php">
             <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>;">
-                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> Mode <?= $is_avance ? "Normal" : "Avancé" ?>
+                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> 
+                Mode <?= $is_avance ? "Normal" : "Avancé" ?>
             </button>
         </form>
     </div>
 
     <div class="dashboard-grid">
         <a href="/ams-reseaux/services/dhcp.php" class="dashboard-card">
-            <i class="fas fa-network-wired card-icon"></i>
+            <i class="fas fa-network-wired card-icon" style="color: #2563eb;"></i>
             <h3>Service DHCP</h3>
             <p>Gestion des IP locales.</p>
         </a>
         <a href="/ams-reseaux/services/nat.php" class="dashboard-card">
-            <i class="fas fa-shield-virus card-icon"></i>
+            <i class="fas fa-shield-virus card-icon" style="color: #ef4444;"></i>
             <h3>Sécurité & NAT</h3>
             <p>Pare-feu et ports.</p>
         </a>
@@ -78,9 +71,9 @@ if (file_exists($menu_path)) { include $menu_path; }
 
     <div class="dashboard-card" style="margin-top: 30px; width: 100%;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3><i class="fas fa-microchip"></i> Appareils détectés sur le réseau</h3>
+            <h3><i class="fas fa-microchip"></i> Appareils connectés</h3>
             <form method="post">
-                <button type="submit" name="run_scan" class="btn-blue" style="font-size: 0.8rem;">
+                <button type="submit" name="run_scan" class="btn-blue">
                     <i class="fas fa-sync-alt"></i> Scanner le réseau
                 </button>
             </form>
@@ -94,11 +87,11 @@ if (file_exists($menu_path)) { include $menu_path; }
                         <th style="padding: 12px;">ADRESSE MAC</th>
                         <th style="padding: 12px;">DERNIÈRE ACTIVITÉ</th>
                         <th style="padding: 12px;">DÉBIT</th>
-                        <th style="padding: 12px; text-align: center;">GESTION</th>
+                        <th style="padding: 12px; text-align: center;">ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (mysqli_num_rows($result_devices) > 0): ?>
+                    <?php if ($result_devices && mysqli_num_rows($result_devices) > 0): ?>
                         <?php while($dev = mysqli_fetch_assoc($result_devices)): ?>
                         <tr style="border-bottom: 1px solid #f3f4f6;">
                             <td style="padding: 12px; font-weight: 600;"><?= htmlspecialchars($dev['ip_address']) ?></td>
@@ -110,12 +103,18 @@ if (file_exists($menu_path)) { include $menu_path; }
                                 </span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;"><i class="fas fa-sliders"></i></button>
+                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;" title="Gérer">
+                                    <i class="fas fa-sliders"></i>
+                                </button>
                             </td>
                         </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">Aucun appareil trouvé.</td></tr>
+                        <tr>
+                            <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                                <i class="fas fa-search"></i> Aucun appareil trouvé. Cliquez sur "Scanner".
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
