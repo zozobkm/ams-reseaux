@@ -32,7 +32,7 @@ def scan():
         
         db.commit()
         db.close()
-        # Correction de la syntaxe pour les anciennes versions de Python
+    
         print("[{}] Scan terminé : {} appareils trouvés.".format(datetime.now(), len(devices_found)))
     except Exception as e:
         print("Erreur : {}".format(e))
