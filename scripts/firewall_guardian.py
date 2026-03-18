@@ -2,12 +2,12 @@ import mysql.connector
 import os
 import datetime
 
-# --- CONFIGURATION (Extraite de ton config.php) ---
+# --- CONFIGURATION  ---
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'forumuser',      # Identifiant de ton config.php
-    'password': 'forum123',   # Mot de passe de ton config.php
-    'database': 'box'         # Nom de la base de ton config.php
+    'user': 'forumuser',      
+    'password': 'forum123',   
+    'database': 'box'        
 }
 
 # Interface LAN identifiée sur ta capture
@@ -36,7 +36,7 @@ def apply_rules():
         cursor.execute("SELECT service_name, est_actif FROM config_securite")
         services = dict(cursor.fetchall())
 
-        # --- EXÉCUTION DES COMMANDES SYSTEME (Compatible ancienne version Python) ---
+        # --- EXÉCUTION DES COMMANDES SYSTEME ---
         # Nettoyage de la chaine de sécurité
         os.system("sudo iptables -F BOX_SECURITY 2>/dev/null || sudo iptables -N BOX_SECURITY")
         
