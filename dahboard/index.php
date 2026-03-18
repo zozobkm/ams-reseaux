@@ -3,25 +3,29 @@ session_start();
 
 // 1. Vérification de connexion
 if (!isset($_SESSION["user_id"])) {
-    
     header("Location: /ams-reseaux/auth/login.php");
     exit;
 }
 
+// 2. Inclusion de la configuration 
 require_once __DIR__ . '/../config.php';
 
 // 3. Logique du bouton "Scanner le réseau"
 if (isset($_POST['run_scan'])) {
     // Exécution du script Python
     shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
-    
+
     header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
 
-// 4. Récupération des données
-$query_devices = "SELECT * FROM devices ORDER BY last_seen DESC";
-$result_devices = mysqli_query($conn, $query_devices);
+// 4. Récupération des données 
+try {
+    $stmt = $pdo_box->query("SELECT * FROM devices ORDER BY last_seen DESC");
+    $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $error_db = "Erreur SQL : " . $e->getMessage();
+}
 
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
@@ -43,18 +47,19 @@ if (file_exists($menu_path)) { include $menu_path; }
 
 <div class="main-content">
     <div class="header-page">
-        <div>
-            <h1>Tableau de bord</h1>
-            <p style="color: var(--text-muted);">Bienvenue, <strong><?= htmlspecialchars($_SESSION["email"]) ?></strong></p>
-        </div>
-        
+        <h1>Tableau de bord</h1>
         <form method="post" action="toggle_mode.php">
             <button type="submit" class="btn-blue" style="background: <?= $is_avance ? '#f59e0b' : '#2563eb' ?>;">
-                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> 
-                Mode <?= $is_avance ? "Normal" : "Avancé" ?>
+                <i class="fas <?= $is_avance ? 'fa-unlock' : 'fa-lock' ?>"></i> Mode <?= $is_avance ? "Normal" : "Avancé" ?>
             </button>
         </form>
     </div>
+
+    <?php if (isset($error_db)): ?>
+        <div style="background: #fee2e2; color: #991b1b; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+            <i class="fas fa-exclamation-circle"></i> <?= $error_db ?>
+        </div>
+    <?php endif; ?>
 
     <div class="dashboard-grid">
         <a href="/ams-reseaux/services/dhcp.php" class="dashboard-card">
@@ -91,8 +96,8 @@ if (file_exists($menu_path)) { include $menu_path; }
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($result_devices && mysqli_num_rows($result_devices) > 0): ?>
-                        <?php while($dev = mysqli_fetch_assoc($result_devices)): ?>
+                    <?php if (!empty($devices)): ?>
+                        <?php foreach ($devices as $dev): ?>
                         <tr style="border-bottom: 1px solid #f3f4f6;">
                             <td style="padding: 12px; font-weight: 600;"><?= htmlspecialchars($dev['ip_address']) ?></td>
                             <td style="padding: 12px;"><code><?= htmlspecialchars($dev['mac_address']) ?></code></td>
@@ -103,12 +108,10 @@ if (file_exists($menu_path)) { include $menu_path; }
                                 </span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;" title="Gérer">
-                                    <i class="fas fa-sliders"></i>
-                                </button>
+                                <button class="btn-blue" style="padding: 6px 10px; background: #64748b;"><i class="fas fa-sliders"></i></button>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-muted);">
