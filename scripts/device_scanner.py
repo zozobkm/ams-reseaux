@@ -3,7 +3,7 @@ import re
 import mysql.connector
 from datetime import datetime
 
-# Configuration extraite de ton config.php
+# Configuration base de donnees
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'forumuser',
@@ -12,10 +12,10 @@ DB_CONFIG = {
 }
 
 def scan():
-    # Lecture de la table ARP du système
+    # Lecture de la table ARP
     output = os.popen('arp -an').read()
     
-    # TRAITEMENT DE CARACTÈRES : Extraction IP et MAC
+    # Traitement : extraction IP et MAC
     devices_found = re.findall(r'\((\d+\.\d+\.\d+\.\d+)\) at ([0-9a-fA-F:]+)', output)
 
     try:
@@ -23,6 +23,7 @@ def scan():
         cursor = db.cursor()
 
         for ip, mac in devices_found:
+            # Enregistrement ou mise a jour
             query = """
                 INSERT INTO devices (ip_address, mac_address, last_seen)
                 VALUES (%s, %s, %s)
@@ -33,7 +34,7 @@ def scan():
         db.commit()
         db.close()
     
-        print("[{}] Scan terminé : {} appareils trouvés.".format(datetime.now(), len(devices_found)))
+        print("Succes : {} appareils detectes".format(len(devices_found)))
     except Exception as e:
         print("Erreur : {}".format(e))
 
