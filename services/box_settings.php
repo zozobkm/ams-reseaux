@@ -17,7 +17,7 @@ $msg = "";
 if(isset($_POST['new_last'])){
     $new_ip = $prefix . trim($_POST['new_last']);
     
-    // Commande sed pour modifier l'IP système (nécessite les droits sudo)
+    // Commande sed pour modifier l'IP système 
     shell_exec("sudo sed -i 's/address .*/address $new_ip/' $file");
     shell_exec("sudo ifdown eth1 && sudo ifup eth1");
     
@@ -45,7 +45,7 @@ if(isset($_POST['new_last'])){
         </div>
 
         <div class="card">
-            <h3>🌐 Configuration de l'interface LAN (eth1)</h3>
+            <h3> Configuration de l'interface LAN (eth1)</h3>
             <p style="color: #555; margin-bottom: 20px;">
                 L'interface **eth1** gère la communication avec vos appareils locaux. 
                 Modifier son adresse IP impactera la passerelle par défaut de tous vos clients.
