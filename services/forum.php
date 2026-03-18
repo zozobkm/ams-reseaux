@@ -7,9 +7,9 @@ session_start();
 // 2. Sécurité : Connexion et Modules
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php'; 
-require_once __DIR__ . "/../services/security.php"; // IMPORTATION DU FILTRE S6
+require_once __DIR__ . "/../services/security.php"; 
 
-/* ===== LOGIQUE MODE EXPERT (ADMIN) ===== */
+/* ===== LOGIQUE MODE EXPERT  ===== */
 $ADMIN_KEY = "admin123";
 if (isset($_POST['admin_key']) && $_POST['admin_key'] === $ADMIN_KEY) {
     $_SESSION['admin'] = true;
@@ -25,7 +25,7 @@ try {
     $stmt = $pdo->query($sql);
     $messages = $stmt->fetchAll();
 
-    // --- MISE À JOUR S6 : CENSURE CENTRALISÉE ---
+    // ---  CENSURE CENTRALISÉE ---
     foreach ($messages as &$msg) {
         // 1. On sécurise contre le XSS
         $propre = htmlspecialchars($msg['contenu']);
