@@ -1,12 +1,13 @@
 #!/bin/bash
-# Script de mise à jour dynamique de la Blacklist
+echo "1. Téléchargement de la Blacklist (StevenBlack)..."
+wget -qO /tmp/hosts https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 
-echo "Téléchargement de la dernière blacklist depuis Internet..."
-# Télécharge un fichier hosts (format: 0.0.0.0 domaine.com)
-wget -qO- https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep "^0\.0\.0\.0" > /etc/blacklist_dns.conf
+echo "2. Conversion pour Bind9..."
+# On prend les lignes qui commencent par 0.0.0.0, on enlève l'IP, et on formate en "zone" Bind9
+# On ignore localhost et on évite de bloquer la machine elle-même.
+grep "^0\.0\.0\.0" /tmp/hosts | grep -v "0.0.0.0 0.0.0.0" | awk '{print "zone \""$2"\" { type master; file \"/etc/bind/db.blackhole\"; };"}' > /etc/bind/named.conf.blacklist
 
-echo "Redémarrage du service DNS pour appliquer les règles..."
-# Si tu utilises dnsmasq (très fréquent sur les box)
-systemctl restart dnsmasq
+echo "3. Application des nouvelles règles..."
+systemctl reload bind9
 
-echo "Blacklist mise à jour avec succès !"
+echo "Mise à jour terminée avec succès !"
