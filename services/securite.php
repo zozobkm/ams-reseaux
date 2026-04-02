@@ -22,7 +22,33 @@ if ($is_avance && isset($_GET['del_kw'])) {
     $pdo->prepare("DELETE FROM contenu_bloque WHERE id = ?")->execute([$_GET['del_kw']]);
 }
 
-// Récupération
+// --- LOGIQUE NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
+$alertes = [];
+if ($is_avance) {
+    // 1. Liste de référence des sites sensibles
+    $sites_officiels = ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr"];
+    
+    // 2. Simulation des requêtes DNS (À relier plus tard à tes vrais logs)
+    $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr"];
+
+    // 3. Algorithme de comparaison de chaînes de caractères
+    foreach ($historique_visites as $visite) {
+        foreach ($sites_officiels as $officiel) {
+            similar_text($visite, $officiel, $pourcentage);
+            
+            // Si ressemblance forte (>80%) mais avec une faute de frappe
+            if ($pourcentage > 80 && $visite !== $officiel) {
+                $alertes[] = [
+                    'site_suspect' => $visite,
+                    'ressemble_a' => $officiel,
+                    'taux' => round($pourcentage, 1)
+                ];
+            }
+        }
+    }
+}
+
+// --- RÉCUPÉRATION BDD ---
 $keywords = $pdo->query("SELECT * FROM contenu_bloque")->fetchAll();
 $services = $pdo->query("SELECT * FROM config_securite")->fetchAll(PDO::FETCH_KEY_PAIR);
 $planning_raw = $pdo->query("SELECT * FROM planning_acces ORDER BY FIELD(jour, 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'), heure ASC")->fetchAll();
@@ -67,6 +93,10 @@ foreach($planning_raw as $p) {
         .header-hours { display: grid; grid-template-columns: repeat(24, 1fr); margin-left: 100px; margin-bottom: 5px; min-width: 800px; }
         .header-hour-item { text-align: center; font-size: 0.7rem; color: #94a3b8; }
         .badge-kw { background: #fee2e2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; border: 1px solid #fecaca; }
+        
+        /* Styles pour le tableau d'anomalies */
+        .table-anomalies th { padding: 10px; border-bottom: 2px solid #cbd5e1; }
+        .table-anomalies td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -105,6 +135,41 @@ foreach($planning_raw as $p) {
             </div>
         </div>
 
+        <?php if ($is_avance): ?>
+        <div class="card" style="margin-bottom: 25px; border-left: 5px solid #f1c40f;">
+            <h3><i class="fas fa-search-dollar"></i> Conseiller de Sécurité : Scanner d'Anomalies</h3>
+            <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px;">
+                L'algorithme heuristique a détecté des requêtes suspectes ressemblant à du Typo-squatting.
+            </p>
+
+            <table class="table-anomalies" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <tr style="background: #f8fafc;">
+                    <th>Domaine suspect</th>
+                    <th>Ressemble à</th>
+                    <th>Fiabilité</th>
+                    <th>Action</th>
+                </tr>
+                <?php if (empty($alertes)): ?>
+                    <tr><td colspan="4" style="text-align: center; color: #10b981;">Aucune menace détectée.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($alertes as $alerte): ?>
+                        <tr>
+                            <td style="color: #ef4444; font-weight: bold;"><?= htmlspecialchars($alerte['site_suspect']) ?></td>
+                            <td><?= htmlspecialchars($alerte['ressemble_a']) ?></td>
+                            <td><span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px;"><?= $alerte['taux'] ?>%</span></td>
+                            <td>
+                                <form method="POST" action="ajouter_blacklist.php" style="margin:0;">
+                                    <input type="hidden" name="domain" value="<?= htmlspecialchars($alerte['site_suspect']) ?>">
+                                    <button type="submit" class="btn-blue" style="padding: 4px 10px; font-size: 0.8rem; background: #ef4444;">Bloquer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </table>
+        </div>
+        <?php endif; ?>
+
         <div class="card">
             <h3><i class="fas fa-clock"></i> Plages Horaires d'Accès Internet (24h/24)</h3>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">
@@ -118,14 +183,14 @@ foreach($planning_raw as $p) {
 
                 <?php foreach($planning as $day => $hours): ?>
                 <div class="planning-row">
-                    <div class="day-label"><?= $day ?></div>
+                    <div class="day-label"><?= htmlspecialchars($day) ?></div>
                     <div class="hour-grid">
                         <?php foreach($hours as $h): ?>
                         <form method="post" style="margin: 0; padding: 0;">
                             <input type="hidden" name="slot_id" value="<?= $h['id'] ?>">
                             <button type="submit" name="toggle_hour" 
                                     class="hour-btn <?= $h['statut'] == 'autorise' ? 'h-autorise' : 'h-bloque' ?>"
-                                    title="<?= $h['heure'] ?>h - <?= $h['statut'] ?>"
+                                    title="<?= $h['heure'] ?>h - <?= htmlspecialchars($h['statut']) ?>"
                                     <?= !$is_avance ? 'disabled' : '' ?>>
                             </button>
                         </form>
