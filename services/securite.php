@@ -35,7 +35,13 @@ if ($is_avance && isset($_POST['block_domain'])) {
     // Ajout visuel dans la liste des mots-clés bloqués pour que l'utilisateur le voie
     $pdo->prepare("INSERT IGNORE INTO contenu_bloque (mot_cle) VALUES (?)")->execute([$_POST['domain']]);
 }
-
+// --- LOGIQUE 4 : MISE À JOUR BLACKLIST DYNAMIQUE (BIND9) ---
+$message_bl = "";
+if ($is_avance && isset($_POST['update_dynamic_bl'])) {
+    // Lance le script Bash et récupère le résultat
+    $resultat = shell_exec("sudo /var/www/html/ams-reseaux/scripts/update_blacklist.sh 2>&1");
+    $message_bl = "Blacklist dynamique mise à jour avec succès !";
+}
 // --- NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
 $alertes = [];
 if ($is_avance) {
