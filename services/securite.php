@@ -1,17 +1,18 @@
 <?php
+session_start();
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php';
 
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
-// --- LOGIQUE : BASCULER UNE HEURE ---
+// --- LOGIQUE 1 : BASCULER UNE HEURE (PLANNING) ---
 if ($is_avance && isset($_POST['toggle_hour'])) {
     $stmt = $pdo->prepare("UPDATE planning_acces SET statut = IF(statut='autorise', 'bloque', 'autorise') WHERE id = ?");
     $stmt->execute([$_POST['slot_id']]);
 }
 
-// --- LOGIQUE : MOTS-CLÉS ---
+// --- LOGIQUE 2 : MOTS-CLÉS ---
 if ($is_avance && isset($_POST['add_keyword'])) {
     $word = trim($_POST['keyword']);
     if (!empty($word)) {
@@ -22,27 +23,47 @@ if ($is_avance && isset($_GET['del_kw'])) {
     $pdo->prepare("DELETE FROM contenu_bloque WHERE id = ?")->execute([$_GET['del_kw']]);
 }
 
-// --- LOGIQUE NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
+// --- LOGIQUE 3 : BLOQUER UN DOMAINE SUSPECT (NOUVEAU) ---
+if ($is_avance && isset($_POST['block_domain'])) {
+    // Nettoyage de sécurité
+    $domain_to_block = escapeshellarg($_POST['domain']);
+    
+    // Commande pour bloquer le site via le pare-feu
+    $cmd = "sudo iptables -I FORWARD -d $domain_to_block -j DROP";
+    shell_exec($cmd);
+    
+    // Ajout visuel dans la liste des mots-clés bloqués pour que l'utilisateur le voie
+    $pdo->prepare("INSERT IGNORE INTO contenu_bloque (mot_cle) VALUES (?)")->execute([$_POST['domain']]);
+}
+
+// --- NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
 $alertes = [];
 if ($is_avance) {
     // 1. Liste de référence des sites sensibles
     $sites_officiels = ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr"];
     
-    // 2. Simulation des requêtes DNS (À relier plus tard à tes vrais logs)
+    // 2. Simulation des requêtes (Dans un projet plus vaste, on lirait les logs DNS ici)
     $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr"];
 
-    // 3. Algorithme de comparaison de chaînes de caractères
+    // 3. Algorithme de comparaison de chaînes de caractères (similar_text)
     foreach ($historique_visites as $visite) {
         foreach ($sites_officiels as $officiel) {
             similar_text($visite, $officiel, $pourcentage);
             
-            // Si ressemblance forte (>80%) mais avec une faute de frappe
+            // Si ressemblance forte (>80%) mais avec une faute de frappe (différent de l'officiel)
             if ($pourcentage > 80 && $visite !== $officiel) {
-                $alertes[] = [
-                    'site_suspect' => $visite,
-                    'ressemble_a' => $officiel,
-                    'taux' => round($pourcentage, 1)
-                ];
+                // On vérifie s'il n'est pas DÉJÀ bloqué dans la base de données
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM contenu_bloque WHERE mot_cle = ?");
+                $stmt->execute([$visite]);
+                $deja_bloque = $stmt->fetchColumn() > 0;
+
+                if (!$deja_bloque) {
+                    $alertes[] = [
+                        'site_suspect' => $visite,
+                        'ressemble_a' => $officiel,
+                        'taux' => round($pourcentage, 1)
+                    ];
+                }
             }
         }
     }
@@ -70,7 +91,6 @@ foreach($planning_raw as $p) {
         .planning-row { display: flex; align-items: center; margin-bottom: 5px; min-width: 900px; }
         .day-label { width: 100px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
         
-        /* Grille de 24 colonnes identiques */
         .hour-grid { 
             display: grid; 
             grid-template-columns: repeat(24, 1fr); 
@@ -103,7 +123,12 @@ foreach($planning_raw as $p) {
     <?php include __DIR__ . '/../menu.php'; ?>
 
     <div class="main-content">
-        <h1>Contrôle Parental & Sécurité</h1>
+        <div class="header-page">
+            <h1>Contrôle Parental & Sécurité</h1>
+            <?php if ($is_avance): ?>
+                <span class="badge" style="background: #e67e22;">Analyseur de texte actif</span>
+            <?php endif; ?>
+        </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
             <div class="card">
@@ -150,7 +175,7 @@ foreach($planning_raw as $p) {
                     <th>Action</th>
                 </tr>
                 <?php if (empty($alertes)): ?>
-                    <tr><td colspan="4" style="text-align: center; color: #10b981;">Aucune menace détectée.</td></tr>
+                    <tr><td colspan="4" style="text-align: center; color: #10b981; padding: 15px;">Aucune nouvelle menace détectée.</td></tr>
                 <?php else: ?>
                     <?php foreach ($alertes as $alerte): ?>
                         <tr>
@@ -158,9 +183,9 @@ foreach($planning_raw as $p) {
                             <td><?= htmlspecialchars($alerte['ressemble_a']) ?></td>
                             <td><span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px;"><?= $alerte['taux'] ?>%</span></td>
                             <td>
-                                <form method="POST" action="ajouter_blacklist.php" style="margin:0;">
+                                <form method="POST" action="" style="margin:0;">
                                     <input type="hidden" name="domain" value="<?= htmlspecialchars($alerte['site_suspect']) ?>">
-                                    <button type="submit" class="btn-blue" style="padding: 4px 10px; font-size: 0.8rem; background: #ef4444;">Bloquer</button>
+                                    <button type="submit" name="block_domain" class="btn-blue" style="padding: 4px 10px; font-size: 0.8rem; background: #ef4444;">Bloquer</button>
                                 </form>
                             </td>
                         </tr>
