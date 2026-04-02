@@ -15,7 +15,7 @@ if (isset($_POST['configurer'])) {
     // Exécution de la commande DNS via le script Bash
 $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dns.sh $domaine";
     $resultat = shell_exec($cmd . " 2>&1");
-    echo "<pre>$resultat</pre>";
+ 
 }
 ?>
 <!DOCTYPE html>
