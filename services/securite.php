@@ -58,7 +58,7 @@ if ($is_avance) {
     );
     
     // 2. Simulation des requêtes (Dans un projet plus vaste, on lirait les logs DNS ici)
-    $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr", "pokker.com"];
+   $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr", "pokker.com", "netflixx.com", "banque-popullaire.fr"];
 
     // 3. Algorithme de comparaison de chaînes de caractères (similar_text)
     foreach ($historique_visites as $visite) {
