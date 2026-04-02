@@ -155,8 +155,7 @@ foreach($planning_raw as $p) {
                 </form>
 
                 <form method="POST" action="" style="margin-bottom: 15px;">
-                    <button type="submit" name="update_dynamic_bl" class="btn-blue" style="background: #8e44ad; width: 100%;">
-                        <i class="fas fa-sync-alt"></i> Mettre à jour la Blacklist DNS (Serveur Bind9)
+                    <button type="submit" name="update_dynamic_bl" class="btn-blue" style="width: 100%;">    <i class="fas fa-sync-alt"></i> Mettre à jour la Blacklist DNS (Serveur Bind9)
                     </button>
                 </form>
                 
