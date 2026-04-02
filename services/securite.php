@@ -35,6 +35,7 @@ if ($is_avance && isset($_POST['block_domain'])) {
     // Ajout visuel dans la liste des mots-clés bloqués pour que l'utilisateur le voie
     $pdo->prepare("INSERT IGNORE INTO contenu_bloque (mot_cle) VALUES (?)")->execute([$_POST['domain']]);
 }
+
 // --- LOGIQUE 4 : MISE À JOUR BLACKLIST DYNAMIQUE (BIND9) ---
 $message_bl = "";
 if ($is_avance && isset($_POST['update_dynamic_bl'])) {
@@ -42,14 +43,22 @@ if ($is_avance && isset($_POST['update_dynamic_bl'])) {
     $resultat = shell_exec("sudo /var/www/html/ams-reseaux/scripts/update_blacklist.sh 2>&1");
     $message_bl = "Blacklist dynamique mise à jour avec succès !";
 }
+
 // --- NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
 $alertes = [];
 if ($is_avance) {
-    // 1. Liste de référence des sites sensibles
-    $sites_officiels = ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr"];
+    // 1. On récupère les mots-clés que l'administrateur a déjà bloqués dans la BDD
+    $stmt = $pdo->query("SELECT mot_cle FROM contenu_bloque");
+    $mots_bloques_bdd = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // On fusionne avec quelques sites vitaux par défaut
+    $sites_officiels = array_merge(
+        ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr"], 
+        $mots_bloques_bdd
+    );
     
     // 2. Simulation des requêtes (Dans un projet plus vaste, on lirait les logs DNS ici)
-    $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr"];
+    $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr", "pokker.com"];
 
     // 3. Algorithme de comparaison de chaînes de caractères (similar_text)
     foreach ($historique_visites as $visite) {
@@ -144,6 +153,19 @@ foreach($planning_raw as $p) {
                     <input type="text" name="keyword" placeholder="Bloquer un mot (ex: Poker)" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;">
                     <button type="submit" name="add_keyword" class="btn-blue">AJOUTER</button>
                 </form>
+
+                <form method="POST" action="" style="margin-bottom: 15px;">
+                    <button type="submit" name="update_dynamic_bl" class="btn-blue" style="background: #8e44ad; width: 100%;">
+                        <i class="fas fa-sync-alt"></i> Mettre à jour la Blacklist DNS (Serveur Bind9)
+                    </button>
+                </form>
+                
+                <?php if (!empty($message_bl)): ?>
+                    <div style="background: #10b981; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-check-circle"></i> <?= $message_bl ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php endif; ?>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                     <?php foreach ($keywords as $kw): ?>
@@ -170,7 +192,7 @@ foreach($planning_raw as $p) {
         <div class="card" style="margin-bottom: 25px; border-left: 5px solid #f1c40f;">
             <h3><i class="fas fa-search-dollar"></i> Conseiller de Sécurité : Scanner d'Anomalies</h3>
             <p style="color: #555; font-size: 0.9rem; margin-bottom: 15px;">
-                L'algorithme heuristique a détecté des requêtes suspectes ressemblant à du Typo-squatting.
+                L'algorithme heuristique a détecté des requêtes suspectes ressemblant à du Typo-squatting ou à vos mots-clés bloqués.
             </p>
 
             <table class="table-anomalies" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
