@@ -11,7 +11,7 @@ cat > /etc/bind/db.blackhole <<EOF
 EOF
 
 echo "2. Conversion pour Bind9..."
-grep "^0\.0\.0\.0" /tmp/hosts | grep -v "0.0.0.0 0.0.0.0" | awk '{print "zone \""$2"\" { type master; file \"/etc/bind/db.blackhole\"; };"}' > /etc/bind/named.conf.blacklist
+grep "^0\.0\.0\.0" /tmp/hosts | grep -v "0.0.0.0 0.0.0.0" | awk '{print $2}' | sort -u | awk '{print "zone \""$1"\" { type master; file \"/etc/bind/db.blackhole\"; };"}' > /etc/bind/named.conf.blacklist
 
 echo "3. Application des nouvelles règles..."
 systemctl restart bind9
