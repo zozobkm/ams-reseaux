@@ -51,14 +51,22 @@ if ($is_avance) {
     $stmt = $pdo->query("SELECT mot_cle FROM contenu_bloque");
     $mots_bloques_bdd = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    // On fusionne avec quelques sites vitaux par défaut
-    $sites_officiels = array_merge(
-        ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr"], 
-        $mots_bloques_bdd
-    );
-    
-    // 2. Simulation des requêtes (Dans un projet plus vaste, on lirait les logs DNS ici)
-   $historique_visites = ["google.com", "faceboook.com", "paypa1.com", "amazon.fr", "g00gle.fr", "pokker.com", "netflixx.com", "banque-popullaire.fr"];
+
+$sites_officiels = array_merge(
+    ["facebook.com", "google.com", "paypal.com", "amazon.fr", "bnpparibas.fr", "netflix.com", "ameli.fr", "impots.gouv.fr"], 
+    $mots_bloques_bdd
+);
+
+
+$historique_visites = [
+    "paypa1.com",          // Ressemble à paypal
+    "ameli-connexion.fr",  // Ressemble à ameli
+    "netflixx.com",        // Ressemble à netflix
+    "amazone.fr",          // Ressemble à amazon
+    "bnppariba.fr",        // Ressemble à bnpparibas
+    "impot-gouv.fr",       // Ressemble à impots.gouv.fr
+    "faceboook.com"        // Ressemble à facebook
+];
 
     // 3. Algorithme de comparaison de chaînes de caractères (similar_text)
     foreach ($historique_visites as $visite) {
