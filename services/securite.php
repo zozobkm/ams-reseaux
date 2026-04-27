@@ -39,11 +39,10 @@ if ($is_avance && isset($_POST['block_domain'])) {
 // --- LOGIQUE 4 : MISE À JOUR BLACKLIST DYNAMIQUE (BIND9) ---
 $message_bl = "";
 if ($is_avance && isset($_POST['update_dynamic_bl'])) {
-    // Lance le script Bash et récupère le résultat
-    $resultat = shell_exec("sudo /var/www/html/ams-reseaux/scripts/update_blacklist.sh 2>&1");
-    $message_bl = "Blacklist dynamique mise à jour avec succès !";
+    // Utilisation du script fast_sync avec les droits sudoers configurés
+    shell_exec("sudo /var/www/html/ams-reseaux/scripts/fast_sync.sh");
+    $message_bl = "Blacklist DNS synchronisée instantanément !";
 }
-
 // --- NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
 $alertes = [];
 if ($is_avance) {
