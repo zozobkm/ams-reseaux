@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $start_octet >= 2 && $end_octet <= 254 && 
             $start_octet < $end_octet) {
             
-            // CORRECTION : Passage au réseau 192.168.10.x pour correspondre à eth1
+        
             $debut_ip = escapeshellarg("192.168.10." . $start_octet);
             $fin_ip = escapeshellarg("192.168.10." . $end_octet);
 
@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($resultat !== ""): ?>
             <div class="card" style="background: #1e293b; color: #38bdf8; border: none;">
-                <h4 style="color: #94a3b8; margin-top: 0;">📜 Logs système :</h4>
+                <h4 style="color: #94a3b8; margin-top: 0;">Logs système :</h4>
                 <pre style="white-space: pre-wrap; margin: 0;"><?= htmlspecialchars($resultat) ?></pre>
             </div>
         <?php endif; ?>
