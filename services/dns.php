@@ -39,7 +39,7 @@ $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dns.sh $domaine";
         </div>
 
         <div class="card">
-            <h3>📖 Gestion des noms de domaine</h3>
+            <h3> Gestion des noms de domaine</h3>
             <p style="color: #555; margin-bottom: 20px;">
                 Le service DNS permet de traduire les noms de domaine (ex: <em>ceribox.lan</em>) en adresses IP locales. 
                 Cela facilite l'accès aux services sans avoir à retenir les numéros IP.
@@ -62,7 +62,7 @@ $cmd = "sudo /var/www/html/ams-reseaux/scripts/config_dns.sh $domaine";
 
         <?php if ($resultat !== ""): ?>
             <div class="card" style="background: #1e293b; color: #38bdf8; border: none;">
-                <h4 style="color: #94a3b8; margin-top: 0;">📜 Logs système (Bind9) :</h4>
+                <h4 style="color: #94a3b8; margin-top: 0;">Logs système (Bind9) :</h4>
                 <pre style="font-family: 'Courier New', monospace; white-space: pre-wrap; margin-bottom: 0;"><?= htmlspecialchars($resultat) ?></pre>
             </div>
         <?php endif; ?>
