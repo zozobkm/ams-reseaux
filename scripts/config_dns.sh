@@ -10,7 +10,7 @@ if grep -q "zone \"$DOMAINE\"" /etc/bind/named.conf.local; then
     exit 1
 fi
 
-# 1. On AJOUTE (>>) à la fin du fichier sans écraser le reste
+
 cat >> /etc/bind/named.conf.local <<EOF
 zone "$DOMAINE" {
     type master;
@@ -18,7 +18,7 @@ zone "$DOMAINE" {
 };
 EOF
 
-# 2. Création du fichier de zone
+#  Création du fichier de zone
 cat > /etc/bind/db.$DOMAINE <<EOF
 \$TTL    604800
 @       IN      SOA     $DOMAINE. root.$DOMAINE. ( 2 604800 86400 2419200 604800 )
