@@ -11,7 +11,7 @@ DB_CONFIG = {
     'database': 'box'        
 }
 
-# Interface LAN (eth1)
+
 LAN_IFACE = "eth1" 
 
 def init_traffic_control():
