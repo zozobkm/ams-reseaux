@@ -6,13 +6,13 @@ require_once 'db.php';
 $mode = $_SESSION["mode"] ?? "normal";
 $is_avance = ($mode === "avance");
 
-// --- LOGIQUE 1 : BASCULER UNE HEURE (PLANNING) ---
+// ---  BASCULER UNE HEURE (PLANNING) ---
 if ($is_avance && isset($_POST['toggle_hour'])) {
     $stmt = $pdo->prepare("UPDATE planning_acces SET statut = IF(statut='autorise', 'bloque', 'autorise') WHERE id = ?");
     $stmt->execute([$_POST['slot_id']]);
 }
 
-// --- LOGIQUE 2 : MOTS-CLÉS ---
+// ---  MOTS-CLÉS ---
 if ($is_avance && isset($_POST['add_keyword'])) {
     $word = trim($_POST['keyword']);
     if (!empty($word)) {
@@ -23,7 +23,7 @@ if ($is_avance && isset($_GET['del_kw'])) {
     $pdo->prepare("DELETE FROM contenu_bloque WHERE id = ?")->execute([$_GET['del_kw']]);
 }
 
-// --- LOGIQUE 3 : BLOQUER UN DOMAINE SUSPECT (NOUVEAU) ---
+// ---  BLOQUER UN DOMAINE SUSPECT  ---
 if ($is_avance && isset($_POST['block_domain'])) {
     // Nettoyage de sécurité
     $domain_to_block = escapeshellarg($_POST['domain']);
@@ -36,14 +36,14 @@ if ($is_avance && isset($_POST['block_domain'])) {
     $pdo->prepare("INSERT IGNORE INTO contenu_bloque (mot_cle) VALUES (?)")->execute([$_POST['domain']]);
 }
 
-// --- LOGIQUE 4 : MISE À JOUR BLACKLIST DYNAMIQUE (BIND9) ---
+// ---MISE À JOUR BLACKLIST DYNAMIQUE (BIND9) ---
 $message_bl = "";
 if ($is_avance && isset($_POST['update_dynamic_bl'])) {
     // Utilisation du script fast_sync avec les droits sudoers configurés
     shell_exec("sudo /var/www/html/ams-reseaux/scripts/fast_sync.sh");
     $message_bl = "Blacklist DNS synchronisée instantanément !";
 }
-// --- NOUVEAU SERVICE : DÉTECTION ANOMALIES (Phishing / Typosquatting) ---
+// ---  DÉTECTION ANOMALIES ---
 $alertes = [];
 if ($is_avance) {
     // 1. On récupère les mots-clés que l'administrateur a déjà bloqués dans la BDD
