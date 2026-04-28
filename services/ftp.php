@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../auth/require_login.php";
 require_once 'db.php';
 
-// --- 1. ACTION : GÉNÉRATION DU FLUX ---
+// --- GÉNÉRATION DU FLUX ---
 if (isset($_GET['action']) && $_GET['action'] === 'generate') {
     if (ob_get_level()) ob_end_clean();
     header("Content-Type: application/octet-stream");
@@ -14,7 +14,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'generate') {
     exit;
 }
 
-// --- 2. ACTION : SAUVEGARDE SQL ---
+// ---  SAUVEGARDE SQL ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['debit'])) {
     try {
         $stmt = $pdo->prepare("INSERT INTO tests_debit (temps_sec, taille_mo, debit_mbps) VALUES (?, ?, ?)");
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['debit'])) {
     exit; 
 }
 
-// --- 3. RÉCUPÉRATION DONNÉES ---
+// ---  RÉCUPÉRATION DONNÉES ---
 $history = $pdo->query("SELECT * FROM tests_debit ORDER BY id DESC LIMIT 10")->fetchAll();
 $chart_data = array_reverse($history);
 $labels = []; $values = [];
@@ -64,13 +64,13 @@ foreach ($chart_data as $row) {
 
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px;">
             <div class="card">
-                <h3>📈 Performance réseau</h3>
+                <h3>Performance réseau</h3>
                 <div style="height: 250px; position: relative;">
                     <canvas id="debitChart"></canvas>
                 </div>
             </div>
             <div class="card">
-                <h3>📂 Historique SQL</h3>
+                <h3> Historique SQL</h3>
                 <table style="width: 100%; font-size: 0.9rem;">
                     <?php foreach ($history as $h): ?>
                     <tr style="border-bottom: 1px solid #eee;">
