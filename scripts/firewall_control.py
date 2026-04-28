@@ -10,12 +10,12 @@ DB_CONFIG = {
     'database': 'box'
 }
 
-# Ton interface LAN identifiée sur ta capture
+
 LAN_INTERFACE = "eth1" 
 
 def apply_security():
     now = datetime.datetime.now()
-    # On fait correspondre les noms de jours avec ta base PHP
+    # On fait correspondre les noms de jours avec la base PHP
     jours_fr = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
     jour_actuel = jours_fr[now.weekday()]
     heure_actuelle = now.hour
