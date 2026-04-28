@@ -16,7 +16,7 @@ if (isset($_POST['run_scan'])) {
     // Utilisation de sudo car www-data a les droits dans visudo
     shell_exec('sudo /usr/bin/python3 /var/www/html/ams-reseaux/scripts/device_scanner.py');
     
-    // Redirection vers le dossier actuel (dahboard sans s)
+    // Redirection 
     header("Location: /ams-reseaux/dahboard/index.php");
     exit;
 }
