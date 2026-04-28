@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "1. Téléchargement de la Blacklist (StevenBlack)..."
-# On enlève le -q pour voir les erreurs s'il y en a
+
 wget -O /tmp/hosts https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 
 # Vérification : si le fichier a bien été téléchargé
