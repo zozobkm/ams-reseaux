@@ -41,12 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send_mail'])) {
     <?php include '../menu.php'; ?>
 
     <div class="main-content">
-        <h1>📧 Messagerie Postfix</h1>
+        <h1> Messagerie Postfix</h1>
         <?= $message_sent ?>
 
         <div class="mail-container">
             <div class="card">
-                <h3>🆕 Nouveau Message</h3>
+                <h3> Nouveau Message</h3>
                 <form method="post">
                     <input type="text" name="to" placeholder="Destinataire (ex: bob@localhost)" required style="width:100%; margin-bottom:10px; padding:10px;">
                     <input type="text" name="subject" placeholder="Sujet" required style="width:100%; margin-bottom:10px; padding:10px;">
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['send_mail'])) {
             </div>
 
             <div class="card">
-                <h3>📥 Boîte de réception</h3>
+                <h3> Boîte de réception</h3>
                 <?php
                 if (file_exists($file_path) && filesize($file_path) > 0) {
                     $content = file_get_contents($file_path);
