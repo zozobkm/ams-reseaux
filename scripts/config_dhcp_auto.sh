@@ -11,8 +11,7 @@ if [ $FIN_IP -gt 254 ]; then FIN_IP=254; fi
 
 echo "Configuration Auto pour $NB appareils..."
 
-# On écrit directement dans le fichier (le script sera lancé en sudo par le PHP)
-cat > /etc/dhcp/dhcpd.conf <<EOF
+
 default-lease-time 600;
 max-lease-time 7200;
 authoritative;
