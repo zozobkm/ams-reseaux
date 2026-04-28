@@ -24,15 +24,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         shell_exec("sudo adduser $user_linux --gecos '' --disabled-password");
         shell_exec("echo '$user_linux:$pass' | sudo chpasswd");
 
-        echo "✅ Utilisateur $email créé avec succès (Web + Mail) !";
+        echo " Utilisateur $email créé avec succès (Web + Mail) !";
     } catch (Exception $e) {
-        echo "❌ Erreur : " . $e->getMessage();
+        echo " Erreur : " . $e->getMessage();
     }
 }
 ?>
 
 <form method="post" class="card">
-    <h3>Créer un nouveau client FAI</h3>
+    <h3>Créer un nouveau client Ceribox</h3>
     <input type="email" name="email" placeholder="Email (ex: alice@box.local)" required>
     <input type="password" name="pass" placeholder="Mot de passe" required>
     <select name="role">
